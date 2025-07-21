@@ -1,0 +1,13 @@
+@font-face {
+  font-family: Satoshi;
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 200 300 400 500 600 700 800 900;
+  src: url('/fonts/Satoshi-Variable.woff2') format('woff2');
+}
+@font-face {
+  font-family: Integral;
+  font-style: normal;
+  font-display: swap;
+  src: url('/fonts/integralcf-bold.otf') format('opentype');
+}

@@ -1,0 +1,39 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:latest
+    container_name: pg_kingcom_server_test
+    environment:
+      POSTGRES_USER: user_kingcom_server_test
+      POSTGRES_PASSWORD: pg_pwd_kingcom_server_test
+      POSTGRES_DB: pg_db_kingcom_server_test
+    volumes:
+      - pg_vol_kingcom_server_test_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - app_network
+    restart: unless-stopped
+
+  # Redis Server with Password and Database Index
+  redis:
+    image: redis:latest
+    container_name: redis_kingcom_server_test
+    command: redis-server --requirepass redis123 --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_vol_kingcom_server_test_data:/data
+    environment:
+      - REDIS_DB_ID=0 # Database index (0-15)
+    networks:
+      - app_network
+    restart: unless-stopped
+
+volumes:
+  pg_vol_kingcom_server_test_data:
+  redis_vol_kingcom_server_test_data:
+
+networks:
+  app_network:
+    driver: bridge
