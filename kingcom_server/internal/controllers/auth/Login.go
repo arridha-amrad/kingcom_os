@@ -25,7 +25,7 @@ func (ctrl *authController) Login(c *gin.Context) {
 	user, err := ctrl.userService.GetUserByIdentity(c.Request.Context(), body.Identity)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
-			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 			return
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

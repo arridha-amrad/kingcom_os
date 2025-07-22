@@ -10,12 +10,12 @@ import (
 	"gorm.io/gorm"
 )
 
-func ConnectRedis(addr, pwd string, db int) *redis.Client {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     addr,
-		Password: pwd,
-		DB:       db,
-	})
+func ConnectRedis(url string) *redis.Client {
+	opt, err := redis.ParseURL(url)
+	if err != nil {
+		log.Fatal("Failed to parse url redis")
+	}
+	rdb := redis.NewClient(opt)
 	log.Println("Redis connection pool established")
 	return rdb
 }
@@ -32,7 +32,7 @@ type DbConnectionOptions struct {
 }
 
 func Connect(params DbConnectionOptions) (*gorm.DB, error) {
-	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=require channel_binding=require",
 		params.Host, params.User, params.Password, params.DbName, params.Port,
 	)
 

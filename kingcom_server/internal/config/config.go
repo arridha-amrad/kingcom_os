@@ -18,9 +18,10 @@ type Config struct {
 }
 
 type RedisConfig struct {
-	ADDR     string
-	Password string
-	DB       int
+	ADDR      string
+	Password  string
+	DB        int
+	REDIS_URL string
 }
 
 type GoogleOAuth2Config struct {
@@ -71,9 +72,10 @@ func LoadEnv() (*Config, error) {
 			MaxIdleConns: vMaxIdleConns,
 		},
 		RDB: RedisConfig{
-			ADDR:     os.Getenv("REDIS_ADDR"),
-			Password: os.Getenv("REDIS_PWD"),
-			DB:       vRedisDb,
+			ADDR:      os.Getenv("REDIS_ADDR"),
+			Password:  os.Getenv("REDIS_PWD"),
+			DB:        vRedisDb,
+			REDIS_URL: os.Getenv("REDIS_URL"),
 		},
 		AppUri:       os.Getenv("APP_URI"),
 		Port:         os.Getenv("PORT"),

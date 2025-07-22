@@ -10,7 +10,7 @@ import (
 
 func RegisterRoutes(c *container.Container) *gin.Engine {
 	router := gin.Default()
-	// router.SetTrustedProxies([]string{"127.0.0.1"})
+	router.SetTrustedProxies([]string{"127.0.0.1"})
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
@@ -30,6 +30,10 @@ func RegisterRoutes(c *container.Container) *gin.Engine {
 		SetAuthRoutes(AuthRoutesParams{
 			RoutesParams: routeParams,
 			Controller:   c.Controllers.Auth,
+		})
+		SetProductRoutes(ProductRoutesParams{
+			RoutesParams: routeParams,
+			Controller:   c.Controllers.Product,
 		})
 	}
 	return router

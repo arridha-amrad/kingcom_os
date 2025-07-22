@@ -3,6 +3,7 @@ package container
 import (
 	"kingcom_server/internal/config"
 	"kingcom_server/internal/controllers/auth"
+	"kingcom_server/internal/controllers/product"
 	"kingcom_server/internal/controllers/user"
 	"kingcom_server/internal/middleware"
 	"kingcom_server/internal/repositories"
@@ -25,6 +26,8 @@ func NewContainer(db *gorm.DB, rdb *redis.Client, validate *validator.Validate, 
 	userRepo := repositories.NewUserRepository(db)
 	redisRepo := repositories.NewRedisRepository(rdb)
 	txManager := transaction.NewTransactionManager(db)
+	productRepo := repositories.NewProductRepository(db)
+	productImagesRepo := repositories.NewProductImageRepository(db)
 
 	// Utilities
 	utilities := utils.NewUtilities(config.JWtSecretKey, config.AppUri, config.GoogleOAuth2)
@@ -36,6 +39,7 @@ func NewContainer(db *gorm.DB, rdb *redis.Client, validate *validator.Validate, 
 	userService := services.NewUserService(userRepo)
 	emailService := services.NewEmailService(config.AppUri, utilities)
 	passwordService := services.NewPasswordService()
+	productService := services.NewProductService(productImagesRepo, productRepo, txManager, utilities)
 
 	// Controllers
 	userCtrl := user.NewUserController(userService)
@@ -47,14 +51,17 @@ func NewContainer(db *gorm.DB, rdb *redis.Client, validate *validator.Validate, 
 		redisService,
 		utilities,
 	)
+	productCtrl := product.NewProductController(productService, userService)
+
 	// Middleware
 	validationMiddleware := middleware.NewValidationMiddleware(validate)
 	authMiddleware := middleware.NewAuthMiddleware(jwtService, userService)
 
 	return &Container{
 		Controllers: &Controllers{
-			Auth: authCtrl,
-			User: userCtrl,
+			Auth:    authCtrl,
+			User:    userCtrl,
+			Product: productCtrl,
 		},
 		Middlewares: &Middlewares{
 			Validation: validationMiddleware,
@@ -69,6 +76,7 @@ type Middlewares struct {
 }
 
 type Controllers struct {
-	Auth auth.IAuthController
-	User user.IUserController
+	Auth    auth.IAuthController
+	User    user.IUserController
+	Product product.IProductController
 }

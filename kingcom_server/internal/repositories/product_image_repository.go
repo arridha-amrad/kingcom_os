@@ -18,7 +18,7 @@ type productImageRepository struct {
 }
 
 type IProductImageRepository interface {
-	SaveMany(tx *gorm.DB, params []SaveParams) (*[]models.ProductImage, error)
+	SaveMany(tx *gorm.DB, productId uuid.UUID, urls []string) (*[]models.ProductImage, error)
 }
 
 func NewProductImageRepository(db *gorm.DB) IProductImageRepository {
@@ -27,18 +27,28 @@ func NewProductImageRepository(db *gorm.DB) IProductImageRepository {
 	}
 }
 
-func (r *productImageRepository) SaveMany(tx *gorm.DB, params []SaveParams) (*[]models.ProductImage, error) {
-	if len(params) == 0 {
+func (r *productImageRepository) SaveMany(tx *gorm.DB, productId uuid.UUID, urls []string) (*[]models.ProductImage, error) {
+	if len(urls) == 0 {
 		return nil, errors.New("params must be a slice of url and product_id")
 	}
-	images := make([]models.ProductImage, 0, len(params))
-	for _, param := range params {
+	images := make([]models.ProductImage, 0, len(urls))
+	for _, url := range urls {
 		images = append(images, models.ProductImage{
-			Url:       param.Url,
-			ProductId: param.ProductId,
+			Url:       url,
+			ProductID: productId,
 		})
 	}
 	if err := tx.Create(&images).Error; err != nil {
+		return nil, err
+	}
+	return &images, nil
+}
+
+func (r *productImageRepository) GetMany(tx *gorm.DB, productID uuid.UUID) (*[]models.ProductImage, error) {
+	var images []models.ProductImage
+	if err := r.db.Where(&models.ProductImage{
+		ProductID: productID,
+	}).Find(&images).Error; err != nil {
 		return nil, err
 	}
 	return &images, nil

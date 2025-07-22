@@ -18,7 +18,7 @@ type Product struct {
 	Price         float64        `json:"price"`
 	Description   string         `json:"description"`
 	Specification string         `json:"specification"`
-	Stock         int            `json:"stock"`
+	Stock         uint           `json:"stock"`
 	VideoUrl      string         `json:"video_url"`
 	Images        []ProductImage `gorm:"foreignKey:ProductID"`
 }
@@ -26,7 +26,7 @@ type Product struct {
 type ProductImage struct {
 	gorm.Model
 	Url       string
-	ProductId uuid.UUID `json:"product_id"`
+	ProductID uuid.UUID `json:"product_id"`
 	Product   Product   `gorm:"foreignKey:ProductID"`
 }
 
@@ -34,9 +34,9 @@ type ProductReview struct {
 	gorm.Model
 	Rating    float64
 	Body      string
-	ProductId uuid.UUID `json:"product_id"`
+	ProductID uuid.UUID `json:"product_id"`
 	Product   Product   `gorm:"foreignKey:ProductID"`
-	UserId    uuid.UUID `json:"user_id"`
+	UserID    uuid.UUID `json:"user_id"`
 	User      User      `gorm:"foreignKey:UserID"`
 }
 

@@ -26,6 +26,7 @@ type IValidationMiddleware interface {
 	ForgotPassword(c *gin.Context)
 	ResetPassword(c *gin.Context)
 	ResendVerification(c *gin.Context)
+	CreateProduct(c *gin.Context)
 }
 
 func NewValidationMiddleware(validate *validator.Validate) IValidationMiddleware {
@@ -33,8 +34,8 @@ func NewValidationMiddleware(validate *validator.Validate) IValidationMiddleware
 }
 
 func (m *validationMiddleware) runValidation(c *gin.Context, input any) {
-	log.Println(input)
-	if err := c.ShouldBindJSON(&input); err != nil {
+	if err := c.ShouldBindJSON(input); err != nil {
+		log.Printf("Bind error: %v\n", err)
 		c.JSON(http.StatusBadRequest, gin.H{"errors": "Required params are missing"})
 		c.Abort()
 		return
@@ -79,6 +80,20 @@ func (m *validationMiddleware) ForgotPassword(c *gin.Context) {
 	c.Next()
 }
 
+func (m *validationMiddleware) CreateProduct(c *gin.Context) {
+	var input dto.CreateProduct
+	m.runValidation(c, &input)
+	c.Set(constants.VALIDATED_BODY, input)
+	c.Next()
+}
+
+func (m *validationMiddleware) Login(c *gin.Context) {
+	var input dto.Login
+	m.runValidation(c, &input)
+	c.Set(constants.VALIDATED_BODY, input)
+	c.Next()
+}
+
 func (m *validationMiddleware) ResendVerification(c *gin.Context) {
 	var input dto.ResendVerification
 	m.runValidation(c, &input)
@@ -95,13 +110,6 @@ func (m *validationMiddleware) ResetPassword(c *gin.Context) {
 
 func (m *validationMiddleware) VerifyNewAccount(c *gin.Context) {
 	var input dto.VerifyNewAccount
-	m.runValidation(c, &input)
-	c.Set(constants.VALIDATED_BODY, input)
-	c.Next()
-}
-
-func (m *validationMiddleware) Login(c *gin.Context) {
-	var input dto.Login
 	m.runValidation(c, &input)
 	c.Set(constants.VALIDATED_BODY, input)
 	c.Next()

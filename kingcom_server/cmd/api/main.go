@@ -16,7 +16,7 @@ func main() {
 		log.Fatalf("Could not load config: %v", err)
 	}
 
-	rdb := database.ConnectRedis(cfg.RDB.ADDR, cfg.RDB.Password, cfg.RDB.DB)
+	rdb := database.ConnectRedis(cfg.RDB.REDIS_URL)
 	if err != nil {
 		log.Panic(err)
 	}
@@ -35,7 +35,12 @@ func main() {
 		log.Panic(err)
 	}
 
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(
+		&models.User{},
+		&models.Product{},
+		&models.ProductImage{},
+		&models.ProductReview{},
+	)
 
 	sqlDB, err := db.DB()
 	if err != nil {
