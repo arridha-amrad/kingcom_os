@@ -40,6 +40,8 @@ func main() {
 		&models.Product{},
 		&models.ProductImage{},
 		&models.ProductReview{},
+		&models.ProductRating{},
+		&models.Cart{},
 	)
 
 	sqlDB, err := db.DB()

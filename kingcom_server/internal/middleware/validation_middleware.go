@@ -27,6 +27,7 @@ type IValidationMiddleware interface {
 	ResetPassword(c *gin.Context)
 	ResendVerification(c *gin.Context)
 	CreateProduct(c *gin.Context)
+	AddToCart(c *gin.Context)
 }
 
 func NewValidationMiddleware(validate *validator.Validate) IValidationMiddleware {
@@ -75,6 +76,13 @@ func (m *validationMiddleware) runValidation(c *gin.Context, input any) {
 
 func (m *validationMiddleware) ForgotPassword(c *gin.Context) {
 	var input dto.ForgotPassword
+	m.runValidation(c, &input)
+	c.Set(constants.VALIDATED_BODY, input)
+	c.Next()
+}
+
+func (m *validationMiddleware) AddToCart(c *gin.Context) {
+	var input dto.AddToCart
 	m.runValidation(c, &input)
 	c.Set(constants.VALIDATED_BODY, input)
 	c.Next()

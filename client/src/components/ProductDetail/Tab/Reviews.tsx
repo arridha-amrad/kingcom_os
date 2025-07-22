@@ -1,9 +1,9 @@
-import ReviewCard from "./Reviews/ReviewCard";
+import ReviewCard from './Reviews/ReviewCard';
 
 const reviews = [
   {
     id: 1,
-    name: "Samantha D.",
+    name: 'Samantha D.',
     rating: 4.5,
     comment:
       "I absolutely love this t-shirt! The design is unique and the fabric feels so comfortable. As a fellow designer, I appreciate the attention to detail. It's become my favorite go-to shirt",
@@ -11,7 +11,7 @@ const reviews = [
   },
   {
     id: 2,
-    name: "Alex M.",
+    name: 'Alex M.',
     rating: 4,
     comment:
       "The t-shirt exceeded my expectations! The colors are vibrant and the print quality is top-notch. Being a UI/UX designer myself, I'm quite picky about aesthetics, and this t-shirt definitely gets a thumbs up from me.",
@@ -19,7 +19,7 @@ const reviews = [
   },
   {
     id: 3,
-    name: "Ethan R.",
+    name: 'Ethan R.',
     rating: 3.5,
     comment:
       "This t-shirt is a must-have for anyone who appreciates good design. The minimalistic yet stylish pattern caught my eye, and the fit is perfect. I can see the designer's touch in every aspect of this shirt.",
@@ -27,7 +27,7 @@ const reviews = [
   },
   {
     id: 4,
-    name: "Price K.",
+    name: 'Price K.',
     rating: 4.5,
     comment:
       "I absolutely love this t-shirt! The design is unique and the fabric feels so comfortable. As a fellow designer, I appreciate the attention to detail. It's become my favorite go-to shirt",
@@ -35,7 +35,7 @@ const reviews = [
   },
   {
     id: 5,
-    name: "James Mc A.",
+    name: 'James Mc A.',
     rating: 4,
     comment:
       "The t-shirt exceeded my expectations! The colors are vibrant and the print quality is top-notch. Being a UI/UX designer myself, I'm quite picky about aesthetics, and this t-shirt definitely gets a thumbs up from me.",
@@ -43,7 +43,7 @@ const reviews = [
   },
   {
     id: 6,
-    name: "John D.",
+    name: 'John D.',
     rating: 3.5,
     comment:
       "This t-shirt is a must-have for anyone who appreciates good design. The minimalistic yet stylish pattern caught my eye, and the fit is perfect. I can see the designer's touch in every aspect of this shirt.",

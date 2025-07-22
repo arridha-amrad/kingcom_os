@@ -24,7 +24,8 @@ type productRepository struct {
 type IProductRepository interface {
 	Save(tx *gorm.DB, params CreateOneProductParams) (*models.Product, error)
 	GetOne(params GetOneProductParams) (*models.Product, error)
-	GetMany() (*[]models.Product, error)
+	GetMany() (*[]ProductWithAvgRating, error)
+	GetOneBySlug(slug string) (*ProductWithAvgRating, error)
 }
 
 func NewProductRepository(db *gorm.DB) IProductRepository {
@@ -69,11 +70,39 @@ func (r *productRepository) Save(tx *gorm.DB, params CreateOneProductParams) (*m
 	return &product, nil
 }
 
-func (r *productRepository) GetMany() (*[]models.Product, error) {
-	var products []models.Product
+func (r *productRepository) GetMany() (*[]ProductWithAvgRating, error) {
+	var products []ProductWithAvgRating
 
-	if err := r.db.Preload("Images").Find(&products).Error; err != nil {
+	if err := r.db.
+		Table("products").
+		Select("products.*, COALESCE(CEIL(AVG(pr.value) * 10) / 10, 0) AS average_rating").
+		Joins("LEFT JOIN product_ratings AS pr ON pr.product_id = products.id").
+		Group("products.id").
+		Preload("Images").Preload("Ratings").Find(&products).Error; err != nil {
 		return nil, err
 	}
 	return &products, nil
+}
+
+type ProductWithAvgRating struct {
+	models.Product
+	AverageRating float64 `json:"average_rating"`
+}
+
+func (r *productRepository) GetOneBySlug(slug string) (*ProductWithAvgRating, error) {
+	var product ProductWithAvgRating
+	whereClause := models.Product{
+		Slug: slug,
+	}
+	if err := r.db.
+		Table("products").
+		Select("products.*, COALESCE(CEIL(AVG(pr.value) * 10) / 10, 0) AS average_rating").
+		Joins("LEFT JOIN product_ratings AS pr ON pr.product_id = products.id").
+		Group("products.id").
+		Preload("Images").
+		Preload("Ratings").
+		Where(whereClause).First(&product).Error; err != nil {
+		return nil, err
+	}
+	return &product, nil
 }

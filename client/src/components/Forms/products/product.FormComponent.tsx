@@ -1,7 +1,7 @@
 import { useFieldContext, useFormContext } from '@/hooks/useAppForm';
 import { useStore } from '@tanstack/react-form';
 import { DollarSign, Image } from 'lucide-react';
-import { useId, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 
 const ErrorMessage = ({
   errors,
@@ -43,6 +43,9 @@ export const ProductTextArea = ({ label }: { label: string }) => {
       textarea.style.height = textarea.scrollHeight + 'px'; // set new height
     }
   };
+  useEffect(() => {
+    handleInput();
+  }, [field.state.value]);
   return (
     <div className="w-full">
       <label className="mx-4 space-y-2 mt-4" htmlFor={id}>

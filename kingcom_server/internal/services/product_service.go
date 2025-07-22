@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"kingcom_server/internal/models"
 	"kingcom_server/internal/repositories"
 	"kingcom_server/internal/transaction"
 	"kingcom_server/internal/utils"
@@ -21,7 +20,8 @@ type productService struct {
 
 type IProductService interface {
 	StoreNewProduct(ctx context.Context, params StoreNewProductParams) error
-	FetchProducts(ctx context.Context) (*[]models.Product, error)
+	FetchProducts(ctx context.Context) (*[]repositories.ProductWithAvgRating, error)
+	FetchProductBySlug(ctx context.Context, slug string) (*repositories.ProductWithAvgRating, error)
 }
 
 func NewProductService(
@@ -38,7 +38,16 @@ func NewProductService(
 	}
 }
 
-func (s *productService) FetchProducts(ctx context.Context) (*[]models.Product, error) {
+func (s *productService) FetchProductBySlug(ctx context.Context, slug string) (*repositories.ProductWithAvgRating, error) {
+	product, err := s.productRepo.GetOneBySlug(slug)
+	if err != nil {
+		return nil, err
+	}
+	return product, nil
+
+}
+
+func (s *productService) FetchProducts(ctx context.Context) (*[]repositories.ProductWithAvgRating, error) {
 	products, err := s.productRepo.GetMany()
 	if err != nil {
 		return nil, err

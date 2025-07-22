@@ -2,21 +2,28 @@
 
 import { useNavigate } from '@tanstack/react-router';
 import Rating from './Rating';
-import type { Product as TProduct } from '@/types/api/product';
 
-type Props = {
-  product: TProduct;
+type Product = {
+  imageUrl: string;
+  rating: number;
+  name: string;
+  price: number;
+  discount: number | null;
+  id: number;
 };
 
-function Product({
-  product: { discount, images, name, price, average_rating, slug },
+type Props = {
+  product: Product;
+};
+
+function ProductDummy({
+  product: { discount, imageUrl, name, price, rating, id },
 }: Props) {
   const router = useNavigate();
-  const imageUrl = images[0].url;
   return (
     <div
       onClick={() => {
-        router({ to: `/products/${slug}` });
+        router({ to: `/products/${id}` });
       }}
       className="relative cursor-pointer w-full px-8 py-4 hover:ring-2 rounded-xl transition-all duration-200 ease-linear ring-foreground/20 overflow-hidden space-y-2"
     >
@@ -30,7 +37,7 @@ function Product({
         />
       </div>
       <h1 className="font-bold xl:text-[20px]">{name}</h1>
-      {average_rating && <Rating value={average_rating} />}
+      <Rating value={rating} />
       <div className="flex items-center gap-3">
         {discount && (
           <h2 className="font-bold xl:text-2xl text-xl">
@@ -54,4 +61,4 @@ function Product({
   );
 }
 
-export default Product;
+export default ProductDummy;

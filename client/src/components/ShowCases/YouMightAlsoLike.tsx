@@ -1,9 +1,9 @@
-import Product from "../Product";
+import ProductDummy from '../ProductDummy';
 
 const data = [
   {
     id: 1,
-    name: "GeForce RTX™ 4090 SUPRIM 24G",
+    name: 'GeForce RTX™ 4090 SUPRIM 24G',
     imageUrl: `https://ik.imagekit.io/o12xdvxz5l/KingCom/1024%20(1).png?updatedAt=1746906350522`,
     rating: 4.5,
     price: 120,
@@ -11,7 +11,7 @@ const data = [
   },
   {
     id: 2,
-    name: "GeForce RTX™ 4090 GAMING TRIO 24G",
+    name: 'GeForce RTX™ 4090 GAMING TRIO 24G',
     imageUrl: `https://ik.imagekit.io/o12xdvxz5l/KingCom/1024.png?updatedAt=1746906350489`,
     rating: 3.5,
     price: 260,
@@ -19,7 +19,7 @@ const data = [
   },
   {
     id: 3,
-    name: "GeForce RTX™ 4090 GAMING TRIO 24G",
+    name: 'GeForce RTX™ 4090 GAMING TRIO 24G',
     imageUrl: `https://ik.imagekit.io/o12xdvxz5l/KingCom/1024%20(2).png?updatedAt=1746906466624`,
     rating: 4.5,
     price: 180,
@@ -27,7 +27,7 @@ const data = [
   },
   {
     id: 4,
-    name: "MPG X870E CARBON WIFI",
+    name: 'MPG X870E CARBON WIFI',
     imageUrl: `https://ik.imagekit.io/o12xdvxz5l/KingCom/1024%20(3).png?updatedAt=1746906941729`,
     rating: 4.5,
     price: 180,
@@ -45,7 +45,7 @@ function YouMightAlsoLike() {
       </div>
       <div className="grid w-full gap-4 md:grid-cols-4 grid-cols-2">
         {data.map((p) => (
-          <Product key={p.id} product={p} />
+          <ProductDummy key={p.id} product={p} />
         ))}
       </div>
     </section>

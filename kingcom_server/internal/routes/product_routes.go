@@ -16,6 +16,8 @@ func SetProductRoutes(params ProductRoutesParams) {
 	r := params.Route.Group("/products")
 	{
 		r.GET("", controller.GetMany)
+		r.GET(":slug", controller.GetDetail)
 		r.POST("", mdwValidation.CreateProduct, mdwAuth.Handler, controller.Create)
+		r.POST("/cart", mdwValidation.AddToCart, mdwAuth.Handler, controller.AddToCart)
 	}
 }

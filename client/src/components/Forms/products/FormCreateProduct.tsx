@@ -50,6 +50,7 @@ export default function FormAddProduct() {
           videoUrl,
         });
         toast.success('New product added', { id });
+        form.reset();
       } catch (err: unknown) {
         if (err instanceof Error) {
           toast.error(err.message, { id });

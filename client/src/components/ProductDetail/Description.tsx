@@ -1,39 +1,39 @@
-import ColorOptions from '@/components/ColorOptions'
-import { cn } from '@/utils'
-import { useState } from 'react'
-import toast from 'react-hot-toast'
-import { SlidingNumber } from '../motion-primitives/slide-number'
-import Rating from '../Rating'
+import ColorOptions from '@/components/ColorOptions';
+import { cn } from '@/utils';
+import { useState } from 'react';
+import toast from 'react-hot-toast';
+import { SlidingNumber } from '../motion-primitives/slide-number';
+import Rating from '../Rating';
 
 type Props = {
   data: {
-    id: number
-    name: string
-    rating: number
-    discount: number
-    price: number
-    description: string
-    images: string[]
-  }
-}
+    id: string;
+    name: string;
+    rating?: number | null;
+    discount?: number | null;
+    price: number;
+    description: string;
+    images: string[];
+  };
+};
 
 export default function ProductDetailDescription({ data }: Props) {
-  const [total, setTotal] = useState(1)
+  const [total, setTotal] = useState(1);
 
   const increase = () => {
-    setTotal((val) => (val += 1))
-  }
+    setTotal((val) => (val += 1));
+  };
 
   const decrease = () => {
     setTotal((val) => {
-      if (val === 1) return val
-      return (val -= 1)
-    })
-  }
+      if (val === 1) return val;
+      return (val -= 1);
+    });
+  };
 
   const addToCart = () => {
-    toast.success('Added')
-  }
+    toast.success('Added');
+  };
 
   return (
     <div className="flex-1 flex-grow min-h-full max-w-lg lg:max-w-3xl gap-4 flex justify-self-center flex-col justify-between">
@@ -43,11 +43,13 @@ export default function ProductDetailDescription({ data }: Props) {
       >
         {data.name}
       </h1>
-      <Rating value={data.rating} />
+      {data.rating && <Rating value={data.rating} />}
       <div className="flex items-center gap-4">
-        <h1 className="font-bold text-3xl">
-          ${data.price - (data.price * data.discount) / 100}
-        </h1>
+        {data.discount && (
+          <h1 className="font-bold text-3xl">
+            ${data.price - (data.price * data.discount) / 100}
+          </h1>
+        )}
         <h1 className="font-bold text-3xl text-foreground/50">${data.price}</h1>
         <div className="w-[72px] h-[34px] rounded-full bg-[#ff3333]/10 flex items-center justify-center font-medium text-red-500">
           -{data.discount}%
@@ -96,11 +98,11 @@ export default function ProductDetailDescription({ data }: Props) {
         </div>
         <button
           onClick={addToCart}
-          className="flex-2 h-13 bg-foreground text-background rounded-full"
+          className="flex-2 font-semibold h-13 bg-foreground text-background rounded-full"
         >
           Add To Cart
         </button>
       </div>
     </div>
-  )
+  );
 }

@@ -1,4 +1,4 @@
-import Product from '../Product'
+import ProductDummy from '../ProductDummy';
 
 const data = [
   {
@@ -33,7 +33,7 @@ const data = [
     price: 180,
     discount: null,
   },
-]
+];
 
 function OnSale() {
   return (
@@ -43,7 +43,7 @@ function OnSale() {
       </div>
       <div className="grid w-full gap-4 md:grid-cols-4 grid-cols-2">
         {data.map((p) => (
-          <Product key={p.id} product={p} />
+          <ProductDummy key={p.id} product={p} />
         ))}
       </div>
       <div className="py-8 mx-auto w-max ">
@@ -52,7 +52,7 @@ function OnSale() {
         </button>
       </div>
     </section>
-  )
+  );
 }
 
-export default OnSale
+export default OnSale;

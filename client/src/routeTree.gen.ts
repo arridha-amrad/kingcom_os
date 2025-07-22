@@ -13,7 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductsIndexRouteImport } from './routes/products/index'
 import { Route as DummyIndexRouteImport } from './routes/dummy/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as ProductsIdRouteImport } from './routes/products/$id'
+import { Route as ProductsSlugRouteImport } from './routes/products/$slug'
 import { Route as DummyDemoTanstackQueryRouteImport } from './routes/dummy/demo.tanstack-query'
 import { Route as DummyDemoFormSimpleRouteImport } from './routes/dummy/demo.form.simple'
 import { Route as DummyDemoFormAddressRouteImport } from './routes/dummy/demo.form.address'
@@ -38,9 +38,9 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ProductsIdRoute = ProductsIdRouteImport.update({
-  id: '/products/$id',
-  path: '/products/$id',
+const ProductsSlugRoute = ProductsSlugRouteImport.update({
+  id: '/products/$slug',
+  path: '/products/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DummyDemoTanstackQueryRoute = DummyDemoTanstackQueryRouteImport.update({
@@ -61,7 +61,7 @@ const DummyDemoFormAddressRoute = DummyDemoFormAddressRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/products/$id': typeof ProductsIdRoute
+  '/products/$slug': typeof ProductsSlugRoute
   '/admin': typeof AdminIndexRoute
   '/dummy': typeof DummyIndexRoute
   '/products': typeof ProductsIndexRoute
@@ -71,7 +71,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/products/$id': typeof ProductsIdRoute
+  '/products/$slug': typeof ProductsSlugRoute
   '/admin': typeof AdminIndexRoute
   '/dummy': typeof DummyIndexRoute
   '/products': typeof ProductsIndexRoute
@@ -82,7 +82,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/products/$id': typeof ProductsIdRoute
+  '/products/$slug': typeof ProductsSlugRoute
   '/admin/': typeof AdminIndexRoute
   '/dummy/': typeof DummyIndexRoute
   '/products/': typeof ProductsIndexRoute
@@ -94,7 +94,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/products/$id'
+    | '/products/$slug'
     | '/admin'
     | '/dummy'
     | '/products'
@@ -104,7 +104,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/products/$id'
+    | '/products/$slug'
     | '/admin'
     | '/dummy'
     | '/products'
@@ -114,7 +114,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/products/$id'
+    | '/products/$slug'
     | '/admin/'
     | '/dummy/'
     | '/products/'
@@ -125,7 +125,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  ProductsIdRoute: typeof ProductsIdRoute
+  ProductsSlugRoute: typeof ProductsSlugRoute
   AdminIndexRoute: typeof AdminIndexRoute
   DummyIndexRoute: typeof DummyIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
@@ -164,11 +164,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/products/$id': {
-      id: '/products/$id'
-      path: '/products/$id'
-      fullPath: '/products/$id'
-      preLoaderRoute: typeof ProductsIdRouteImport
+    '/products/$slug': {
+      id: '/products/$slug'
+      path: '/products/$slug'
+      fullPath: '/products/$slug'
+      preLoaderRoute: typeof ProductsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dummy/demo/tanstack-query': {
@@ -197,7 +197,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  ProductsIdRoute: ProductsIdRoute,
+  ProductsSlugRoute: ProductsSlugRoute,
   AdminIndexRoute: AdminIndexRoute,
   DummyIndexRoute: DummyIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,

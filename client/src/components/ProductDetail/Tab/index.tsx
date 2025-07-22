@@ -1,12 +1,11 @@
-'use client'
-import { cn } from '@/utils'
-import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react'
-import { Fragment } from 'react'
-import FAQS from './FAQs'
-import Reviews from './Reviews'
-import Specifications from './Specifications'
-import Description from './Descriptions'
-import Video from './Video'
+import { cn } from '@/utils';
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/react';
+import { Fragment } from 'react';
+import FAQS from './FAQs';
+import Reviews from './Reviews';
+import Specifications from './Specifications';
+import Description from './Descriptions';
+import Video from './Video';
 
 const tabs = [
   'Descriptions',
@@ -14,7 +13,7 @@ const tabs = [
   'Videos',
   'Rating & Reviews',
   'FAQs',
-]
+];
 
 function MyTab() {
   return (
@@ -59,7 +58,7 @@ function MyTab() {
         </TabPanel>
       </TabPanels>
     </TabGroup>
-  )
+  );
 }
 
-export default MyTab
+export default MyTab;
