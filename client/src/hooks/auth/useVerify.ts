@@ -1,9 +1,10 @@
-import { publicAxios } from '@/lib/axiosInterceptor'
-import type { VerifyRequest, VerifyResponse } from '@/types/api/auth'
-import { useMutation } from '@tanstack/react-query'
-import { AxiosError } from 'axios'
+import { publicAxios } from '@/lib/axiosInterceptor';
+import type { VerifyRequest, VerifyResponse } from '@/types/api/auth';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { AxiosError } from 'axios';
 
 export const useVerify = () => {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: async (params: VerifyRequest) => {
       try {
@@ -15,14 +16,19 @@ export const useVerify = () => {
               'Content-Type': 'application/json',
             },
           },
-        )
-        return res.data
+        );
+        return res.data;
       } catch (err: unknown) {
-        console.log(err)
+        console.log(err);
         if (err instanceof AxiosError) {
-          throw new Error(err.message)
+          throw new Error(err.message);
         }
       }
     },
-  })
-}
+    onSuccess: (data) => {
+      if (!data) return;
+      localStorage.setItem('auth', 'true');
+      qc.setQueryData(['me'], data.user);
+    },
+  });
+};
