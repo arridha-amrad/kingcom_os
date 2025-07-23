@@ -17,6 +17,7 @@ type IProductController interface {
 	GetMany(c *gin.Context)
 	GetDetail(c *gin.Context)
 	AddToCart(c *gin.Context)
+	GetCart(c *gin.Context)
 }
 
 func NewProductController(

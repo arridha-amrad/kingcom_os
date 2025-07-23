@@ -9,13 +9,13 @@ import (
 
 type Cart struct {
 	ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
-	UserID    uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_user_product"`
-	ProductID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_user_product"`
-	Quantity  int       `gorm:"not null;check:quantity > 0"`
-	CreatedAt time.Time `gorm:"autoCreateTime"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime"`
-	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
-	Product   Product   `gorm:"foreignKey:ProductID;constraint:OnDelete:CASCADE"`
+	UserID    uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_user_product" json:"userId"`
+	ProductID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_user_product" json:"-"`
+	Quantity  int       `gorm:"not null;check:quantity > 0" json:"quantity"`
+	CreatedAt time.Time `gorm:"autoCreateTime" json:"createdAt"`
+	UpdatedAt time.Time `gorm:"autoUpdateTime" json:"updatedAt"`
+	User      User      `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE" json:"-"`
+	Product   Product   `gorm:"foreignKey:ProductID;constraint:OnDelete:CASCADE" json:"-"`
 }
 
 func (p *Cart) BeforeCreate(tx *gorm.DB) (err error) {

@@ -16,6 +16,7 @@ type cartService struct {
 
 type ICartService interface {
 	Store(ctx context.Context, params StoreParams) error
+	GetUserCart(ctx context.Context, userId uuid.UUID) (*[]repositories.CartWithProduct, error)
 }
 
 func NewCartService(
@@ -40,6 +41,10 @@ func (s *cartService) Store(ctx context.Context, params StoreParams) error {
 		return nil
 	})
 	return err
+}
+
+func (s *cartService) GetUserCart(ctx context.Context, userId uuid.UUID) (*[]repositories.CartWithProduct, error) {
+	return s.cartRepository.GetMany(userId)
 }
 
 type StoreParams struct {

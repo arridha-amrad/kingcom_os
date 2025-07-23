@@ -1,7 +1,4 @@
-"use client";
-
-import { useCartStore } from "../stores/cartStore";
-import { Tag } from "lucide-react";
+import { Tag } from 'lucide-react';
 
 type Props = {
   discount: number | null;
@@ -9,11 +6,6 @@ type Props = {
 };
 
 function OrderSummary({ discount, deliveryFee }: Props) {
-  const items = useCartStore((store) => store.items);
-  const subtotal = items.reduce((pv, cv) => pv + cv.price * cv.quantity, 0);
-  const afterDiscount = discount ? (subtotal * discount) / 100 : 0;
-  const total = subtotal - afterDiscount + deliveryFee;
-
   return (
     <div className="h-max w-full shrink-0 border space-y-6 border-foreground/20 p-6 rounded-3xl">
       <h1 className="font-bold text-2xl">Order Summary</h1>

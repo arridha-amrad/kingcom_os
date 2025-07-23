@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProductsIndexRouteImport } from './routes/products/index'
 import { Route as DummyIndexRouteImport } from './routes/dummy/index'
+import { Route as CartIndexRouteImport } from './routes/cart/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ProductsSlugRouteImport } from './routes/products/$slug'
 import { Route as DummyDemoTanstackQueryRouteImport } from './routes/dummy/demo.tanstack-query'
@@ -31,6 +32,11 @@ const ProductsIndexRoute = ProductsIndexRouteImport.update({
 const DummyIndexRoute = DummyIndexRouteImport.update({
   id: '/dummy/',
   path: '/dummy/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CartIndexRoute = CartIndexRouteImport.update({
+  id: '/cart/',
+  path: '/cart/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
@@ -63,6 +69,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/admin': typeof AdminIndexRoute
+  '/cart': typeof CartIndexRoute
   '/dummy': typeof DummyIndexRoute
   '/products': typeof ProductsIndexRoute
   '/dummy/demo/tanstack-query': typeof DummyDemoTanstackQueryRoute
@@ -73,6 +80,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/admin': typeof AdminIndexRoute
+  '/cart': typeof CartIndexRoute
   '/dummy': typeof DummyIndexRoute
   '/products': typeof ProductsIndexRoute
   '/dummy/demo/tanstack-query': typeof DummyDemoTanstackQueryRoute
@@ -84,6 +92,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/admin/': typeof AdminIndexRoute
+  '/cart/': typeof CartIndexRoute
   '/dummy/': typeof DummyIndexRoute
   '/products/': typeof ProductsIndexRoute
   '/dummy/demo/tanstack-query': typeof DummyDemoTanstackQueryRoute
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/'
     | '/products/$slug'
     | '/admin'
+    | '/cart'
     | '/dummy'
     | '/products'
     | '/dummy/demo/tanstack-query'
@@ -106,6 +116,7 @@ export interface FileRouteTypes {
     | '/'
     | '/products/$slug'
     | '/admin'
+    | '/cart'
     | '/dummy'
     | '/products'
     | '/dummy/demo/tanstack-query'
@@ -116,6 +127,7 @@ export interface FileRouteTypes {
     | '/'
     | '/products/$slug'
     | '/admin/'
+    | '/cart/'
     | '/dummy/'
     | '/products/'
     | '/dummy/demo/tanstack-query'
@@ -127,6 +139,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ProductsSlugRoute: typeof ProductsSlugRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  CartIndexRoute: typeof CartIndexRoute
   DummyIndexRoute: typeof DummyIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
   DummyDemoTanstackQueryRoute: typeof DummyDemoTanstackQueryRoute
@@ -155,6 +168,13 @@ declare module '@tanstack/react-router' {
       path: '/dummy'
       fullPath: '/dummy'
       preLoaderRoute: typeof DummyIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cart/': {
+      id: '/cart/'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/': {
@@ -199,6 +219,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ProductsSlugRoute: ProductsSlugRoute,
   AdminIndexRoute: AdminIndexRoute,
+  CartIndexRoute: CartIndexRoute,
   DummyIndexRoute: DummyIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,
   DummyDemoTanstackQueryRoute: DummyDemoTanstackQueryRoute,

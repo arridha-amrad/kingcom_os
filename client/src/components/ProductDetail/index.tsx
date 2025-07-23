@@ -1,26 +1,8 @@
-'use client';
-
 import { useState } from 'react';
 import Description from './Description';
 import { cn } from '@/utils';
 import useGetProductDetail from '@/hooks/product/useGetProductDetail';
 import { useParams } from '@tanstack/react-router';
-
-// const data = {
-//   id: 1,
-//   name: 'Gigabyte Motherboard Intel Z890 Aorus Elite X Ice',
-//   rating: 4.5,
-//   discount: 40,
-//   price: 1790,
-//   description:
-//     'Motherboard ini dirancang untuk mendukung prosesor Intel® Core™ Ultra (Seri 2), menghadirkan performa canggih dengan solusi VRM 16+1+2 fase berbasis digital twin untuk kestabilan daya yang optimal. Dilengkapi dengan D5 Bionic Corsa, sistem ini memungkinkan performa memori yang luar biasa dan tak terbatas, didukung oleh kompatibilitas memori DDR5 dengan dukungan modul XMP.',
-//   images: [
-//     'https://ik.imagekit.io/o12xdvxz5l/KingCom/Z890%20AORUS%20ELITE%20X%20ICE.png?updatedAt=1747086239357',
-//     'https://ik.imagekit.io/o12xdvxz5l/KingCom/Gigabyte%20Motherboard%20Intel%20Z890%20Aorus%20Elite%20X%20Ice%204.png?updatedAt=1747124148011',
-//     'https://ik.imagekit.io/o12xdvxz5l/KingCom/Gigabyte%20Motherboard%20Intel%20Z890%20Aorus%20Elite%20X%20Ice%202.png?updatedAt=1747124147932',
-//     'https://ik.imagekit.io/o12xdvxz5l/KingCom/Gigabyte%20Motherboard%20Intel%20Z890%20Aorus%20Elite%20X%20Ice%203.png?updatedAt=1747124148077',
-//   ],
-// };
 
 function ProductDetail() {
   const { slug } = useParams({ from: '/products/$slug' });

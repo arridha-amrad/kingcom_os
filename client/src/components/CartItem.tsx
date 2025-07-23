@@ -1,31 +1,19 @@
-"use client";
+'use client';
 
-import { Trash } from "lucide-react";
-import Image from "next/image";
-import { Item, useCartStore } from "../stores/cartStore";
-import ButtonQuantity from "./Button/ButtonQuantity";
-
-type Props = {
-  item: Item;
-};
+import { Trash } from 'lucide-react';
+import ButtonQuantity from './Button/ButtonQuantity';
 
 function CartItem({ item: { id, imageUrl, name, price, quantity } }: Props) {
-  const addQuantity = useCartStore((store) => store.addQuantity);
-  const subtractQuantity = useCartStore((store) => store.subtractQuantity);
-
   const onDecrease = () => {
     if (quantity === 1) return;
-    subtractQuantity(id);
   };
 
-  const onIncrease = () => {
-    addQuantity(id);
-  };
+  const onIncrease = () => {};
 
   return (
     <article className="flex gap-4 h-max">
       <div className="lg:size-[124px] size-[90px] shrink-0 rounded-3xl overflow-hidden">
-        <Image
+        <img
           width={250}
           height={250}
           src={imageUrl}

@@ -13,6 +13,6 @@ type CreateProduct struct {
 }
 
 type AddToCart struct {
-	ProductID uuid.UUID `json:"product_id" validate:"required"`
-	Quantity  uint      `json:"quantity" validate:"required,gt=0"`
+	ProductID uuid.UUID `json:"productId" validate:"required"`
+	Quantity  int       `json:"quantity" validate:"required,gt=0"`
 }

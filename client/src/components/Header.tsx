@@ -1,13 +1,13 @@
-'use client'
+'use client';
 
-import { Search, ShoppingCart } from 'lucide-react'
-import ButtonSearch from './Button/ButtonSearch'
-import { Link, useNavigate } from '@tanstack/react-router'
-import ButtonUser from './Button/ButtonUser'
-import ButtonTheme from './Button/ButtonTheme'
+import { Search, ShoppingCart } from 'lucide-react';
+import ButtonSearch from './Button/ButtonSearch';
+import { Link, useNavigate } from '@tanstack/react-router';
+import ButtonUser from './Button/ButtonUser';
+import ButtonTheme from './Button/ButtonTheme';
 
 function Header() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   return (
     <header className="h-[6rem] sticky top-0 bg-background/70 backdrop-blur z-50 shrink-0 w-full px-4 flex items-center gap-4">
       <div className="flex-1">
@@ -51,7 +51,7 @@ function Header() {
         <div className="block lg:hidden pt-1">
           <ButtonSearch />
         </div>
-        <button>
+        <button onClick={() => navigate({ to: '/cart' })}>
           <ShoppingCart />
         </button>
         <ButtonUser />
@@ -59,7 +59,7 @@ function Header() {
         <ButtonTheme />
       </div>
     </header>
-  )
+  );
 }
 
-export default Header
+export default Header;

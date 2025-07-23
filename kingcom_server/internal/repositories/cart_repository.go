@@ -19,6 +19,7 @@ type SaveOneParams struct {
 
 type ICartRepository interface {
 	SaveOne(tx *gorm.DB, params SaveOneParams) (*models.Cart, error)
+	GetMany(userId uuid.UUID) (*[]CartWithProduct, error)
 }
 
 func NewCartRepository(db *gorm.DB) ICartRepository {
@@ -39,14 +40,67 @@ func (r *cartRepository) SaveOne(tx *gorm.DB, params SaveOneParams) (*models.Car
 	return &cart, nil
 }
 
-func (r *cartRepository) GetMany(tx *gorm.DB, userId uuid.UUID) (*[]models.Cart, error) {
-	var products []models.Cart
-	if err := r.db.
+func (r *cartRepository) GetMany(userId uuid.UUID) (*[]CartWithProduct, error) {
+	var flatCarts []CartWithProductFlat
+	err := r.db.
 		Table("carts").
-		Select("carts.*").
-		Joins("LEFT JOIN product AS p ON p.id = carts.id").
-		Find(&products).Error; err != nil {
+		Select(`
+			carts.*,
+			products.id AS product_id,
+			products.name AS product_name,
+			products.price AS product_price,
+			products.discount AS product_discount,
+			(SELECT url FROM product_images WHERE product_images.product_id = carts.product_id LIMIT 1) AS product_image
+		`).
+		Joins("LEFT JOIN products ON products.id = carts.product_id").
+		Where("carts.user_id = ?", userId).
+		Scan(&flatCarts).Error
+
+	if err != nil {
 		return nil, err
 	}
-	return &products, nil
+
+	// Mapping flat struct ke nested struct
+	var result []CartWithProduct
+	for _, flat := range flatCarts {
+		result = append(result, CartWithProduct{
+			Cart: flat.Cart,
+			Product: struct {
+				ID       uuid.UUID `json:"id"`
+				Name     string    `json:"name"`
+				Price    float64   `json:"price"`
+				Image    string    `json:"image"`
+				Discount int       `json:"discount"`
+			}{
+				ID:       flat.ProductID,
+				Name:     flat.ProductName,
+				Price:    flat.ProductPrice,
+				Image:    flat.ProductImage,
+				Discount: flat.ProductDiscount,
+			},
+		})
+	}
+
+	return &result, nil
+}
+
+type CartWithProductFlat struct {
+	models.Cart
+	ProductID       uuid.UUID `json:"product_id"`
+	ProductName     string    `json:"product_name"`
+	ProductPrice    float64   `json:"product_price"`
+	ProductDiscount int       `json:"product_discount"`
+	ProductImage    string    `json:"product_image"`
+}
+
+type CartWithProduct struct {
+	models.Cart
+
+	Product struct {
+		ID       uuid.UUID `json:"id"`
+		Name     string    `json:"name"`
+		Price    float64   `json:"price"`
+		Image    string    `json:"image"`
+		Discount int       `json:"discount"`
+	}
 }

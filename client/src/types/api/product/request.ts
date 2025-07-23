@@ -7,3 +7,8 @@ export interface CreteProductRequest {
   videoUrl: string;
   images: string[];
 }
+
+export interface AddToCartRequest {
+  productId: string;
+  quantity: number;
+}

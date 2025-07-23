@@ -36,3 +36,7 @@ export interface ProductImage {
   url: string;
   product_id: string;
 }
+
+export interface AddToCartResponse {
+  message: string;
+}
