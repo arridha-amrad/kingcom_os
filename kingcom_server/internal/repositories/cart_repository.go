@@ -14,6 +14,7 @@ type cartRepository struct {
 type SaveOneParams struct {
 	ProductID uuid.UUID
 	Quantity  int
+	UserID    uuid.UUID
 }
 
 type ICartRepository interface {
@@ -30,6 +31,7 @@ func (r *cartRepository) SaveOne(tx *gorm.DB, params SaveOneParams) (*models.Car
 	cart := models.Cart{
 		Quantity:  params.Quantity,
 		ProductID: params.ProductID,
+		UserID:    params.UserID,
 	}
 	if err := tx.Create(&cart).Error; err != nil {
 		return nil, err

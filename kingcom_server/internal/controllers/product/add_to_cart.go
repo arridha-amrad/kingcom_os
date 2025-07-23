@@ -2,7 +2,9 @@ package product
 
 import (
 	"kingcom_server/internal/constants"
+	"kingcom_server/internal/dto"
 	"kingcom_server/internal/services"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,5 +32,22 @@ func (ctrl *productController) AddToCart(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"userId": userId})
+	value, exist = c.Get(constants.VALIDATED_BODY)
+	if !exist {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "validated body not exists"})
+		return
+	}
+	body, ok := value.(dto.AddToCart)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid type for validated body"})
+		return
+	}
+
+	log.Println("Add to cart is successful")
+
+	c.JSON(http.StatusCreated, gin.H{
+		"userId":    userId,
+		"quantity":  body.Quantity,
+		"productID": body.ProductID,
+	})
 }

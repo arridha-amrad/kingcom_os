@@ -9,6 +9,7 @@ import (
 type productController struct {
 	productService services.IProductService
 	userService    services.IUserService
+	cartService    services.ICartService
 }
 
 type IProductController interface {
@@ -18,9 +19,14 @@ type IProductController interface {
 	AddToCart(c *gin.Context)
 }
 
-func NewProductController(prodService services.IProductService, userService services.IUserService) IProductController {
+func NewProductController(
+	prodService services.IProductService,
+	userService services.IUserService,
+	cartService services.ICartService,
+) IProductController {
 	return &productController{
 		productService: prodService,
 		userService:    userService,
+		cartService:    cartService,
 	}
 }

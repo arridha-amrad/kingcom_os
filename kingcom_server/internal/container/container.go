@@ -28,6 +28,7 @@ func NewContainer(db *gorm.DB, rdb *redis.Client, validate *validator.Validate, 
 	txManager := transaction.NewTransactionManager(db)
 	productRepo := repositories.NewProductRepository(db)
 	productImagesRepo := repositories.NewProductImageRepository(db)
+	cartRepo := repositories.NewCartRepository(db)
 
 	// Utilities
 	utilities := utils.NewUtilities(config.JWtSecretKey, config.AppUri, config.GoogleOAuth2)
@@ -40,6 +41,7 @@ func NewContainer(db *gorm.DB, rdb *redis.Client, validate *validator.Validate, 
 	emailService := services.NewEmailService(config.AppUri, utilities)
 	passwordService := services.NewPasswordService()
 	productService := services.NewProductService(productImagesRepo, productRepo, txManager, utilities)
+	cartService := services.NewCartService(cartRepo, txManager)
 
 	// Controllers
 	userCtrl := user.NewUserController(userService)
@@ -51,7 +53,7 @@ func NewContainer(db *gorm.DB, rdb *redis.Client, validate *validator.Validate, 
 		redisService,
 		utilities,
 	)
-	productCtrl := product.NewProductController(productService, userService)
+	productCtrl := product.NewProductController(productService, userService, cartService)
 
 	// Middleware
 	validationMiddleware := middleware.NewValidationMiddleware(validate)
