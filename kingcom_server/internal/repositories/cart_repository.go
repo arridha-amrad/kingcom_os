@@ -46,13 +46,19 @@ func (r *cartRepository) GetMany(userId uuid.UUID) (*[]CartWithProduct, error) {
 		Table("carts").
 		Select(`
 			carts.*,
-			products.id AS product_id,
-			products.name AS product_name,
-			products.price AS product_price,
-			products.discount AS product_discount,
-			(SELECT url FROM product_images WHERE product_images.product_id = carts.product_id LIMIT 1) AS product_image
+			p.id AS product_id,
+			p.name AS product_name,
+			p.price AS product_price,
+			p.discount AS product_discount,
+			(
+				SELECT url 
+				FROM product_images 
+				WHERE product_images.product_id = carts.product_id 
+				LIMIT 1
+			) 
+			AS product_image
 		`).
-		Joins("LEFT JOIN products ON products.id = carts.product_id").
+		Joins("LEFT JOIN products AS p ON p.id = carts.product_id").
 		Where("carts.user_id = ?", userId).
 		Scan(&flatCarts).Error
 
@@ -60,18 +66,11 @@ func (r *cartRepository) GetMany(userId uuid.UUID) (*[]CartWithProduct, error) {
 		return nil, err
 	}
 
-	// Mapping flat struct ke nested struct
 	var result []CartWithProduct
 	for _, flat := range flatCarts {
 		result = append(result, CartWithProduct{
 			Cart: flat.Cart,
-			Product: struct {
-				ID       uuid.UUID `json:"id"`
-				Name     string    `json:"name"`
-				Price    float64   `json:"price"`
-				Image    string    `json:"image"`
-				Discount int       `json:"discount"`
-			}{
+			Product: ProductInCart{
 				ID:       flat.ProductID,
 				Name:     flat.ProductName,
 				Price:    flat.ProductPrice,
@@ -95,12 +94,13 @@ type CartWithProductFlat struct {
 
 type CartWithProduct struct {
 	models.Cart
+	Product ProductInCart
+}
 
-	Product struct {
-		ID       uuid.UUID `json:"id"`
-		Name     string    `json:"name"`
-		Price    float64   `json:"price"`
-		Image    string    `json:"image"`
-		Discount int       `json:"discount"`
-	}
+type ProductInCart struct {
+	ID       uuid.UUID `json:"id"`
+	Name     string    `json:"name"`
+	Price    float64   `json:"price"`
+	Image    string    `json:"image"`
+	Discount int       `json:"discount"`
 }

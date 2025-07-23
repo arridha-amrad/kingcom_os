@@ -8,7 +8,7 @@ import (
 )
 
 type Cart struct {
-	ID        uuid.UUID `gorm:"type:uuid;primaryKey"`
+	ID        uuid.UUID `gorm:"type:uuid;primaryKey" json:"id"`
 	UserID    uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_user_product" json:"userId"`
 	ProductID uuid.UUID `gorm:"type:uuid;not null;uniqueIndex:idx_user_product" json:"-"`
 	Quantity  int       `gorm:"not null;check:quantity > 0" json:"quantity"`

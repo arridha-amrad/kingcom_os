@@ -20,30 +20,25 @@ export const Route = createFileRoute('/cart/')({
 });
 
 function RouteComponent() {
-  const data = Route.useLoaderData();
-
-  return <p>cart route</p>;
-  // return (
-  //   <main className="xl:max-w-7xl w-full mx-auto px-4">
-  //     <div className="w-full h-px bg-[#f0f0f0] mx-auto"></div>
-  //     <section
-  //       id="breadcrumb"
-  //       className="flex py-6 justify-center md:justify-start text-black/50 items-center gap-2"
-  //     >
-  //       <p>Home</p>
-  //       <ChevronRight />
-  //       <p className="text-black">Cart</p>
-  //     </section>
-  //     <section className="w-full">
-  //       <h1 className="text-4xl font-bold font-header text-center md:text-start">
-  //         Your Cart
-  //       </h1>
-  //       <div className="flex lg:flex-row flex-col pt-6 gap-8">
-  //         {/* <Carts /> */}
-  //         <div className="w-full lg:max-w-md">{/* <OrderSummary /> */}</div>
-  //       </div>
-  //     </section>
-  //     <div className="xl:mb-48 mb-16"></div>
-  //   </main>
-  // );
+  return (
+    <main className="xl:max-w-7xl w-full mx-auto px-4">
+      <section
+        id="breadcrumb"
+        className="flex py-6 justify-center md:justify-start text-foreground/50 items-center gap-2"
+      >
+        <p>Home</p>
+        <ChevronRight />
+        <p className="text-foreground">Cart</p>
+      </section>
+      <section className="w-full">
+        <div className="flex lg:flex-row flex-col pt-6 gap-8">
+          <Carts />
+          <div className="w-full lg:max-w-md">
+            <OrderSummary />
+          </div>
+        </div>
+      </section>
+      <div className="xl:mb-48 mb-16"></div>
+    </main>
+  );
 }

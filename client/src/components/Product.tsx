@@ -45,7 +45,7 @@ function Product({
           ${price}
         </h2>
         {discount && (
-          <div className="bg-[#ff3333]/10 text-red-500 rounded-full font-medium text-xs flex items-center justify-center w-[58px] h-[28px]">
+          <div className="bg-red-500/10 text-red-500 rounded-full font-medium text-xs flex items-center justify-center py-1 px-2">
             -{discount}%
           </div>
         )}
