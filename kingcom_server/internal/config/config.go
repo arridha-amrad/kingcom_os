@@ -9,12 +9,13 @@ import (
 )
 
 type Config struct {
-	DB           database.DbConnectionOptions
-	RDB          RedisConfig
-	Port         string
-	JWtSecretKey string
-	GoogleOAuth2 GoogleOAuth2Config
-	AppUri       string
+	DB               database.DbConnectionOptions
+	RDB              RedisConfig
+	Port             string
+	JWtSecretKey     string
+	GoogleOAuth2     GoogleOAuth2Config
+	AppUri           string
+	RajaOngkirApiKey string
 }
 
 type RedisConfig struct {
@@ -61,6 +62,7 @@ func LoadEnv() (*Config, error) {
 		return nil, err
 	}
 	cfg := &Config{
+		RajaOngkirApiKey: os.Getenv("RAJA_ONGKIR_API_KEY"),
 		DB: database.DbConnectionOptions{
 			Host:         os.Getenv("DB_HOST"),
 			User:         os.Getenv("DB_USER"),

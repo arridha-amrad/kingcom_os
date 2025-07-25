@@ -35,6 +35,10 @@ func RegisterRoutes(c *container.Container) *gin.Engine {
 			RoutesParams: routeParams,
 			Controller:   c.Controllers.Product,
 		})
+		SetShippingRoutes(ShippingRoutesParams{
+			RoutesParams:     routeParams,
+			RajaOngkirApiKey: c.RajaOngkirApiKey,
+		})
 	}
 	return router
 }

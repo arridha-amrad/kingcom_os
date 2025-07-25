@@ -3,7 +3,6 @@ package main
 import (
 	"kingcom_server/internal/config"
 	"kingcom_server/internal/container"
-	"kingcom_server/internal/models"
 	"kingcom_server/internal/routes"
 	"kingcom_server/internal/validation"
 	"kingcom_server/pkg/database"
@@ -35,14 +34,14 @@ func main() {
 		log.Panic(err)
 	}
 
-	db.AutoMigrate(
-		&models.User{},
-		&models.Product{},
-		&models.ProductImage{},
-		&models.ProductReview{},
-		&models.ProductRating{},
-		&models.Cart{},
-	)
+	// db.AutoMigrate(
+	// 	&models.User{},
+	// 	&models.Product{},
+	// 	&models.ProductImage{},
+	// 	&models.ProductReview{},
+	// 	&models.ProductRating{},
+	// 	&models.Cart{},
+	// )
 
 	sqlDB, err := db.DB()
 	if err != nil {

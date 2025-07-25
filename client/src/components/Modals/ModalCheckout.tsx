@@ -26,6 +26,8 @@ export default function ModalCheckout() {
   const { data: cities } = useGetCities(provinceId);
   const [cityId, setCityId] = useState<null | number>(null);
   const { data: districts } = useGetDistrict(cityId);
+  console.log({ districts });
+
   const [districtId, setDistrictId] = useState<null | number>(null);
 
   const { data: cost } = useDistrictCalculateCost(originId, weight, districtId);
