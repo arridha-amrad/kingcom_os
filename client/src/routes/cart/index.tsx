@@ -1,9 +1,9 @@
 import Carts from '@/components/Cart';
 import OrderSummary from '@/components/OrderSummary';
+import Spinner from '@/components/Spinner';
 import { getCart } from '@/hooks/product/useGetCart';
-import { privateAxios } from '@/lib/axiosInterceptor';
+import { getProvinces } from '@/hooks/useShipping';
 import { createFileRoute } from '@tanstack/react-router';
-import { AxiosError } from 'axios';
 import { ChevronRight } from 'lucide-react';
 
 export const Route = createFileRoute('/cart/')({
@@ -12,16 +12,27 @@ export const Route = createFileRoute('/cart/')({
     ctx.context.queryClient.ensureQueryData({ queryKey: ['me'] });
   },
   loader({ context }) {
-    return context.queryClient.ensureQueryData({
+    context.queryClient.ensureQueryData({
       queryKey: ['get-cart'],
       queryFn: getCart,
     });
+    context.queryClient.ensureQueryData({
+      queryKey: ['shipping-province'],
+      queryFn: getProvinces,
+    });
+  },
+  pendingComponent: () => {
+    return (
+      <div className="flex items-center justify-center mt-8 fill-foreground">
+        <Spinner />
+      </div>
+    );
   },
 });
 
 function RouteComponent() {
   return (
-    <main className="xl:max-w-7xl w-full mx-auto px-4">
+    <main className="w-full mx-auto px-4">
       <section
         id="breadcrumb"
         className="flex py-6 justify-center md:justify-start text-foreground/50 items-center gap-2"

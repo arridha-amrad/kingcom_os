@@ -7,11 +7,12 @@ interface ViteTypeOptions {
 }
 
 interface ImportMetaEnv {
-  readonly VITE_BASE_SERVER_URL: string
-  readonly VITE_API_VERSION: string
+  readonly VITE_BASE_SERVER_URL: string;
+  readonly VITE_API_VERSION: string;
+  readonly VITE_RAJA_ONGKIR_API_KEY: string;
   // more env variables...
 }
 
 interface ImportMeta {
-  readonly env: ImportMetaEnv
+  readonly env: ImportMetaEnv;
 }

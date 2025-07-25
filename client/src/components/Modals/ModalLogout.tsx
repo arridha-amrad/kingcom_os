@@ -58,7 +58,7 @@ export default function ModalLogout({ isOpen, setIsOpen }: Props) {
               className="w-full flex items-center justify-center bg-foreground py-2 rounded-xl text-background font-semibold"
               onClick={logout}
             >
-              {true ? <Spinner /> : 'Yes, Log me out'}
+              {isPending ? <Spinner /> : 'Yes, Log me out'}
             </button>
           </DialogPanel>
         </div>

@@ -1,14 +1,31 @@
-import { defineConfig } from 'vite'
-import viteReact from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
+import { defineConfig } from 'vitest/config';
+import viteReact from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+import { tanstackRouter } from '@tanstack/router-plugin/vite';
 
-import { TanStackRouterVite } from '@tanstack/router-plugin/vite'
-import { resolve } from 'node:path'
+import { fileURLToPath } from 'url';
+import path from 'path';
 
-// https://vitejs.dev/config/
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 export default defineConfig({
+  server: {
+    proxy: {
+      '/api': {
+        target: 'https://rajaongkir.komerce.id',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '/api/v1/destination'),
+      },
+      '/calc': {
+        target: 'https://rajaongkir.komerce.id',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/calc/, '/api/v1/calculate'),
+      },
+    },
+  },
   plugins: [
-    TanStackRouterVite({ autoCodeSplitting: true }),
+    tanstackRouter({ autoCodeSplitting: true }),
     viteReact(),
     tailwindcss(),
   ],
@@ -18,7 +35,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
+      '@': path.resolve(__dirname, './src'),
     },
   },
-})
+});
