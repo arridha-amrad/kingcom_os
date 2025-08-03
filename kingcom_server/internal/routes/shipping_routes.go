@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"kingcom_server/internal/utils"
 	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -15,48 +17,50 @@ import (
 const (
 	destinationUrl = "https://rajaongkir.komerce.id/api/v1/destination"
 	calcCostUrl    = "https://rajaongkir.komerce.id/api/v1/calculate/district/domestic-cost"
+	courier        = "jne:sicepat:ide:sap:jnt:ninja:tiki:lion:anteraja:pos:ncs:rex:rpx:sentral:star:wahana:dse"
+	price          = "lowest"
 )
 
 type ShippingRoutesParams struct {
 	*RoutesParams
 	RajaOngkirApiKey string
+	Utils            utils.IUtils
 }
 
 func SetShippingRoutes(params ShippingRoutesParams) {
 	r := params.Route.Group("/shipping")
 	{
-		r.GET("/get-provinces", func(ctx *gin.Context) { GetProvinces(ctx, params.RajaOngkirApiKey) })
-		r.GET("/get-cities/:provinceID", func(ctx *gin.Context) { GetCities(ctx, params.RajaOngkirApiKey) })
-		r.GET("/get-districts/:cityID", func(ctx *gin.Context) { GetDistricts(ctx, params.RajaOngkirApiKey) })
-		r.POST("/calc-cost", func(ctx *gin.Context) { CalcCost(ctx, params.RajaOngkirApiKey) })
+		r.GET("/get-provinces", func(ctx *gin.Context) { GetProvinces(ctx, params.Utils, params.RajaOngkirApiKey) })
+		r.GET("/get-cities/:provinceID", func(ctx *gin.Context) { GetCities(ctx, params.Utils, params.RajaOngkirApiKey) })
+		r.GET("/get-districts/:cityID", func(ctx *gin.Context) { GetDistricts(ctx, params.Utils, params.RajaOngkirApiKey) })
+		r.POST("/calc-cost", func(ctx *gin.Context) { CalcCost(ctx, params.Utils, params.RajaOngkirApiKey) })
 	}
 }
 
 type Params struct {
-	OriginID
+	OriginID      int `json:"originId"`
+	DestinationID int `json:"destinationId"`
+	Weight        int `json:"weight"`
 }
 
-func CalcCost(c *gin.Context, key string) {
+func CalcCost(c *gin.Context, utils utils.IUtils, key string) {
 
-	originID := c.ShouldBindJSON()
-	destinationID := "7114"
-	weight := "1000"
-	courier := "jne:sicepat:ide:sap:jnt:ninja:tiki:lion:anteraja:pos:ncs:rex:rpx:sentral:star:wahana:dse"
-	price := "lowest"
+	var input Params
+	if err := c.ShouldBindJSON(&input); err != nil {
+		utils.RespondWithError(c, http.StatusBadRequest, err, "Invalid input")
+		return
+	}
 
-	// Encode sebagai form
 	form := url.Values{}
-	form.Set("origin", originID)
-	form.Set("destination", destinationID)
-	form.Set("weight", weight)
+	form.Set("origin", strconv.Itoa(input.OriginID))
+	form.Set("destination", strconv.Itoa(input.DestinationID))
+	form.Set("weight", strconv.Itoa(input.Weight))
 	form.Set("courier", courier)
 	form.Set("price", price)
 
-	// Kirim request POST
 	req, err := http.NewRequest("POST", calcCostUrl, strings.NewReader(form.Encode()))
 	if err != nil {
-		log.Println("failed to create request:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.RespondWithError(c, http.StatusInternalServerError, err, "failed to create request")
 		return
 	}
 
@@ -64,66 +68,57 @@ func CalcCost(c *gin.Context, key string) {
 	req.Header.Set("Accept", "application/json")
 	req.Header.Set("key", key)
 
-	// Kirim request
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Println("failed to send request:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.RespondWithError(c, http.StatusInternalServerError, err, "failed to send request")
 		return
 	}
 	defer resp.Body.Close()
 
-	// Baca responsenya
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Println("failed to read response:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.RespondWithError(c, http.StatusInternalServerError, err, "failed to read response body")
 		return
 	}
 
-	fmt.Println("Raw response:", string(body))
-
-	// Parse JSON ke struct
 	var response CostResponse
 	if err := json.Unmarshal(body, &response); err != nil {
-		log.Println("failed to parse response:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.RespondWithError(c, http.StatusInternalServerError, err, "failed to unmarshal json")
 		return
 	}
 
 	c.JSON(http.StatusOK, response)
 }
 
-func GetDistricts(c *gin.Context, key string) {
+func GetDistricts(c *gin.Context, utils utils.IUtils, key string) {
 	cityId := c.Param("cityID")
 	url := fmt.Sprintf("%s/district/%s", destinationUrl, cityId)
 	body, err := runRequest(url, key)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.RespondWithError(c, http.StatusInternalServerError, err, "Failed to fetch districts")
 		return
 	}
 	var response CityDistrictResponse
 	if err := json.Unmarshal(body, &response); err != nil {
-		log.Println("failed to unmarshal json:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.RespondWithError(c, http.StatusInternalServerError, err, "failed to unmarshal json")
 		return
 	}
+	log.Println(response)
 	c.JSON(http.StatusOK, response)
 }
 
-func GetCities(c *gin.Context, key string) {
+func GetCities(c *gin.Context, utils utils.IUtils, key string) {
 	provinceId := c.Param("provinceID")
 	url := fmt.Sprintf("%s/city/%s", destinationUrl, provinceId)
 	body, err := runRequest(url, key)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.RespondWithError(c, http.StatusInternalServerError, err, "Failed to fetch cities")
 		return
 	}
 	var response CityDistrictResponse
 	if err := json.Unmarshal(body, &response); err != nil {
-		log.Println("failed to unmarshal json:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.RespondWithError(c, http.StatusInternalServerError, err, "failed to unmarshal json")
 		return
 	}
 	for _, city := range response.Data {
@@ -132,22 +127,18 @@ func GetCities(c *gin.Context, key string) {
 	c.JSON(http.StatusOK, response)
 }
 
-func GetProvinces(c *gin.Context, key string) {
+func GetProvinces(c *gin.Context, utils utils.IUtils, key string) {
 	url := fmt.Sprintf("%s/province", destinationUrl)
-
 	body, err := runRequest(url, key)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.RespondWithError(c, http.StatusInternalServerError, err, "Failed to fetch provinces")
 		return
 	}
-
 	var response ProvinceResponse
 	if err := json.Unmarshal(body, &response); err != nil {
-		log.Println("failed to unmarshal json:", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		utils.RespondWithError(c, http.StatusInternalServerError, err, "failed to unmarshal json")
 		return
 	}
-
 	c.JSON(http.StatusOK, response)
 }
 
@@ -198,14 +189,6 @@ type ProvinceResponse struct {
 		ID   int    `json:"id"`
 		Name string `json:"name"`
 	} `json:"data"`
-}
-
-type CostRequest struct {
-	Origin      string `json:"Origin"`      // Ubah jadi huruf besar
-	Destination string `json:"Destination"` // Ubah jadi huruf besar
-	Weight      int    `json:"Weight"`
-	Courier     string `json:"Courier"`
-	Price       string `json:"Price"`
 }
 
 type CostResponse struct {

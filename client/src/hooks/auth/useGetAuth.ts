@@ -12,10 +12,10 @@ export const useGetAuth = () => {
       }
       return failureCount < 2;
     },
-    staleTime: 5 * 60 * 1000, // optional: reduce unnecessary refetching
+    staleTime: 5 * 60 * 1000,
     enabled: () => {
       const auth = localStorage.getItem('auth');
-      return auth ? auth === 'true' : false;
+      return !!auth && auth === 'true';
     },
     queryFn: async () => {
       try {

@@ -20,6 +20,7 @@ type Container struct {
 	Controllers *Controllers
 	Middlewares *Middlewares
 	*config.Config
+	utils.IUtils
 }
 
 func NewContainer(db *gorm.DB, rdb *redis.Client, validate *validator.Validate, config *config.Config) *Container {
@@ -71,6 +72,7 @@ func NewContainer(db *gorm.DB, rdb *redis.Client, validate *validator.Validate, 
 			Auth:       authMiddleware,
 		},
 		Config: config,
+		IUtils: utilities,
 	}
 }
 

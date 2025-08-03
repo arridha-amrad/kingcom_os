@@ -38,6 +38,7 @@ func RegisterRoutes(c *container.Container) *gin.Engine {
 		SetShippingRoutes(ShippingRoutesParams{
 			RoutesParams:     routeParams,
 			RajaOngkirApiKey: c.RajaOngkirApiKey,
+			Utils:            c.IUtils,
 		})
 	}
 	return router

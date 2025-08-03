@@ -1,96 +1,78 @@
+import { publicAxios } from '@/lib/axiosInterceptor';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-
-type ProvinceResponse = {
-  data: {
-    id: number;
-    name: string;
-  }[];
-};
 
 export function useGetProvince() {
   return useQuery({
     queryKey: ['shipping-province'],
     queryFn: getProvinces,
-    staleTime: 1000 * 60 * 24,
+    staleTime: 1000 * 60 * 5,
   });
 }
+export const getProvinces = async () => {
+  try {
+    const res = await publicAxios.get<Response>('/shipping/get-provinces');
+    return res.data.data;
+  } catch (err) {
+    throw new Error('failed to fetch provinces');
+  }
+};
 
-export function useGetCities(provinceId: number | null | undefined) {
+export function useGetCities(provinceId: Nun) {
   return useQuery({
     queryKey: ['shipping-city', provinceId],
     queryFn: async () => {
       try {
-        const res = await axios.get<ProvinceResponse>(
-          `/api/city/${provinceId}`,
-          {
-            headers: {
-              Key: import.meta.env.VITE_RAJA_ONGKIR_API_KEY,
-            },
-          },
+        const res = await publicAxios.get<Response>(
+          `/shipping/get-cities/${provinceId}`,
         );
         return res.data.data;
       } catch (err) {
         throw new Error('failed to fetch provinces');
       }
     },
-    staleTime: 1000 * 60 * 24,
+    staleTime: 1000 * 60 * 5,
     enabled: !!provinceId,
   });
 }
 
-export function useGetDistrict(cityId: number | null | undefined) {
+export function useGetDistricts(cityId: Nun) {
   return useQuery({
     queryKey: ['shipping-district', cityId],
     queryFn: async () => {
       try {
-        const res = await axios.get<ProvinceResponse>(
-          `/api/district/${cityId}`,
-          {
-            headers: {
-              Key: import.meta.env.VITE_RAJA_ONGKIR_API_KEY,
-            },
-          },
+        const res = await publicAxios.get<Response>(
+          `/shipping/get-districts/${cityId}`,
         );
         return res.data.data;
       } catch (err) {
-        throw new Error('failed to fetch provinces');
+        throw new Error('failed to fetch districts');
       }
     },
-    staleTime: 1000 * 60 * 24,
+    staleTime: 1000 * 60 * 5,
     enabled: !!cityId,
   });
 }
 
-export function useDistrictCalculateCost(
-  originId: number,
-  weight: number,
-  destinationId?: number | null,
-) {
+export function useGetCosts(originId: Nun, weight: Nun, destinationId: Nun) {
   return useQuery({
     queryKey: ['shipping-cost', originId, destinationId, weight],
     enabled: !!originId && !!destinationId && !!weight,
-    staleTime: 1000 * 60 * 24,
+    staleTime: 1000 * 60 * 5,
     queryFn: async () => {
       try {
-        const response = await fetch('/calc/district/domestic-cost', {
-          method: 'POST',
-          headers: {
-            key: import.meta.env.VITE_RAJA_ONGKIR_API_KEY,
-            'Content-Type': 'application/x-www-form-urlencoded',
+        const res = await publicAxios.post<ShippingCostResponse>(
+          '/shipping/calc-cost',
+          {
+            originId,
+            destinationId,
+            weight,
           },
-          body: new URLSearchParams({
-            origin: originId.toString(),
-            destination: (destinationId ?? 0).toString(),
-            weight: weight.toString(),
-            courier:
-              'jne:sicepat:ide:sap:jnt:ninja:tiki:lion:anteraja:pos:ncs:rex:rpx:sentral:star:wahana:dse',
-            price: 'lowest',
-          }).toString(),
-        });
-
-        const data = await response.json();
-        return data.data;
+        );
+        const data = res.data.data;
+        if (data.length > 5) {
+          return data.slice(0, 5);
+        }
+        return data;
       } catch (err) {
         throw new Error('failed to calculate the cost');
       }
@@ -98,28 +80,24 @@ export function useDistrictCalculateCost(
   });
 }
 
-export const getProvinces = async () => {
-  try {
-    const res = await axios.get<ProvinceResponse>('/api/province', {
-      headers: {
-        Key: import.meta.env.VITE_RAJA_ONGKIR_API_KEY,
-      },
-    });
-    return res.data.data;
-  } catch (err) {
-    throw new Error('failed to fetch provinces');
-  }
+export type Courier = ShippingCostResponse['data'][number];
+
+type ShippingCostResponse = {
+  data: {
+    name: string;
+    code: string;
+    service: string;
+    description: string;
+    cost: number;
+    etd: string;
+  }[];
 };
 
-export const getCities = async () => {
-  try {
-    const res = await axios.get<ProvinceResponse>('/api/city/{province_id}', {
-      headers: {
-        Key: import.meta.env.VITE_RAJA_ONGKIR_API_KEY,
-      },
-    });
-    return res.data.data;
-  } catch (err) {
-    throw new Error('failed to fetch provinces');
-  }
+type Response = {
+  data: {
+    id: number;
+    name: string;
+  }[];
 };
+
+type Nun = number | undefined | null;

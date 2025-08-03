@@ -4,37 +4,40 @@ import {
   DialogPanel,
   DialogTitle,
   Description,
+  RadioGroup,
+  Radio,
 } from '@headlessui/react';
 import { ArrowRightIcon, X } from 'lucide-react';
 import { useState } from 'react';
 import {
-  useDistrictCalculateCost,
+  useGetCosts,
   useGetCities,
-  useGetDistrict,
+  useGetDistricts,
   useGetProvince,
+  type Courier,
 } from '@/hooks/useShipping';
 import CheckoutSelect from '../Forms/checkout/Select';
 
 export default function ModalCheckout() {
   const [isOpen, setIsOpen] = useState(false);
-  const { data } = useGetProvince();
 
   const originId = 1334;
   const weight = 1000;
 
   const [provinceId, setProvinceId] = useState<null | number>(null);
-  const { data: cities } = useGetCities(provinceId);
   const [cityId, setCityId] = useState<null | number>(null);
-  const { data: districts } = useGetDistrict(cityId);
-  console.log({ districts });
-
   const [districtId, setDistrictId] = useState<null | number>(null);
 
-  const { data: cost } = useDistrictCalculateCost(originId, weight, districtId);
+  const { data: provinces } = useGetProvince();
+  const { data: cities } = useGetCities(provinceId);
+  const { data: districts } = useGetDistricts(cityId);
 
-  if (!data) return null;
+  const { data: costs, isFetching } = useGetCosts(originId, weight, districtId);
+  const [courier, setCourier] = useState<null | Courier>(null);
 
-  console.log({ cost });
+  if (!provinces) return null;
+
+  console.log(costs);
 
   return (
     <>
@@ -72,7 +75,7 @@ export default function ModalCheckout() {
               <CheckoutSelect
                 setId={setProvinceId}
                 label="Province"
-                options={data}
+                options={provinces}
               />
               <CheckoutSelect setId={setCityId} label="City" options={cities} />
               <CheckoutSelect
@@ -80,6 +83,53 @@ export default function ModalCheckout() {
                 label="District"
                 options={districts}
               />
+            </div>
+            {isFetching && (
+              <div className="animate-pulse mt-8 mb-2">
+                Finding available service...
+              </div>
+            )}
+            {costs && (
+              <div className="mt-4">
+                <div className="text-sm font-medium">Available services</div>
+                <RadioGroup
+                  value={courier}
+                  onChange={setCourier}
+                  aria-label="Courier"
+                  className="space-y-2"
+                >
+                  {costs.map((cost, i) => (
+                    <Radio
+                      key={i}
+                      value={cost}
+                      className="flex items-end justify-between hover:bg-foreground/5 transition-colors ease-in duration-100 px-4 py-2 rounded-lg cursor-pointer data-checked:bg-white/10"
+                    >
+                      <div className="flex flex-col">
+                        <span className="text-sm font-semibold">
+                          {cost.name}
+                        </span>
+                        <span className="text-sm">{cost.service}</span>
+                      </div>
+                      <div className="flex flex-col items-end">
+                        <span className="text-sm italic font-bold">
+                          {cost.etd}
+                        </span>
+                        <span className="text-sm">
+                          {`Rp ${cost.cost.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`}
+                        </span>
+                      </div>
+                    </Radio>
+                  ))}
+                </RadioGroup>
+              </div>
+            )}
+            <div className="my-4">
+              <button
+                disabled={!courier}
+                className="bg-foreground disabled:brightness-75 text-background w-full rounded-2xl py-2 font-medium hover:bg-foreground/90 transition-colors ease-in duration-100"
+              >
+                Continue
+              </button>
             </div>
           </DialogPanel>
         </div>
