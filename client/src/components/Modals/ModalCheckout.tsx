@@ -17,12 +17,19 @@ import {
   type Courier,
 } from '@/hooks/useShipping';
 import CheckoutSelect from '../Forms/checkout/Select';
+import { useGetCart } from '@/hooks/product/useGetCart';
+import { useGetAuth } from '@/hooks/auth/useGetAuth';
 
 export default function ModalCheckout() {
   const [isOpen, setIsOpen] = useState(false);
+  const { data: authUser } = useGetAuth();
+  const { data: cart } = useGetCart(authUser);
 
   const originId = 1334;
-  const weight = 1000;
+
+  const weight =
+    cart?.reduce((acc, item) => acc + item.Product.weight * item.quantity, 0) ??
+    0;
 
   const [provinceId, setProvinceId] = useState<null | number>(null);
   const [cityId, setCityId] = useState<null | number>(null);
@@ -31,13 +38,19 @@ export default function ModalCheckout() {
   const { data: provinces } = useGetProvince();
   const { data: cities } = useGetCities(provinceId);
   const { data: districts } = useGetDistricts(cityId);
-
   const { data: costs, isFetching } = useGetCosts(originId, weight, districtId);
+
   const [courier, setCourier] = useState<null | Courier>(null);
 
-  if (!provinces) return null;
+  const closeModal = () => {
+    setIsOpen(false);
+    setProvinceId(null);
+    setCityId(null);
+    setDistrictId(null);
+    setCourier(null);
+  };
 
-  console.log(costs);
+  if (!provinces) return null;
 
   return (
     <>
@@ -60,7 +73,7 @@ export default function ModalCheckout() {
           >
             <div className="absolute inset-0 blur-3xl -z-50 bg-foreground/10" />
             <button
-              onClick={() => setIsOpen(false)}
+              onClick={closeModal}
               className="absolute top-[4%] right-[5%]"
             >
               <X className="stroke-foreground/50 hover:stroke-foreground transition-colors ease-in duration-100" />
@@ -91,7 +104,9 @@ export default function ModalCheckout() {
             )}
             {costs && (
               <div className="mt-4">
-                <div className="text-sm font-medium">Available services</div>
+                <div className="text-sm font-medium mb-2">
+                  Available services
+                </div>
                 <RadioGroup
                   value={courier}
                   onChange={setCourier}

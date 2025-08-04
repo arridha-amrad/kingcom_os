@@ -97,5 +97,6 @@ type StoreNewProductParams struct {
 	Specification string
 	Stock         uint
 	VideoUrl      string
+	Weight        float64
 	Images        []string
 }

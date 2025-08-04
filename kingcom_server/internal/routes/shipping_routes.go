@@ -104,7 +104,6 @@ func GetDistricts(c *gin.Context, utils utils.IUtils, key string) {
 		utils.RespondWithError(c, http.StatusInternalServerError, err, "failed to unmarshal json")
 		return
 	}
-	log.Println(response)
 	c.JSON(http.StatusOK, response)
 }
 

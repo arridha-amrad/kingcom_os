@@ -74,5 +74,6 @@ export interface Cart {
     price: number;
     image: string;
     discount: number;
+    weight: number;
   };
 }

@@ -23,6 +23,7 @@ export interface Product {
   stock: number;
   video_url: string;
   images: ProductImage[];
+  weight: number;
   // coming soon
   average_rating?: number | null;
   discount?: number | null;

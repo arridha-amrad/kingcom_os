@@ -49,6 +49,7 @@ func (r *cartRepository) GetMany(userId uuid.UUID) (*[]CartWithProduct, error) {
 			p.id AS product_id,
 			p.name AS product_name,
 			p.price AS product_price,
+			p.weight AS product_weight,
 			p.discount AS product_discount,
 			(
 				SELECT url 
@@ -76,6 +77,7 @@ func (r *cartRepository) GetMany(userId uuid.UUID) (*[]CartWithProduct, error) {
 				Price:    flat.ProductPrice,
 				Image:    flat.ProductImage,
 				Discount: flat.ProductDiscount,
+				Weight:   flat.ProductWeight,
 			},
 		})
 	}
@@ -90,6 +92,7 @@ type CartWithProductFlat struct {
 	ProductPrice    float64   `json:"product_price"`
 	ProductDiscount int       `json:"product_discount"`
 	ProductImage    string    `json:"product_image"`
+	ProductWeight   float64   `json:"product_weight"`
 }
 
 type CartWithProduct struct {
@@ -103,4 +106,5 @@ type ProductInCart struct {
 	Price    float64   `json:"price"`
 	Image    string    `json:"image"`
 	Discount int       `json:"discount"`
+	Weight   float64   `json:"weight"`
 }

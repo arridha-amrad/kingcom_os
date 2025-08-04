@@ -4,6 +4,7 @@ import "github.com/google/uuid"
 
 type CreateProduct struct {
 	Name          string   `json:"name" validate:"required"`
+	Weight        float64  `json:"weight" validate:"required,numeric,gt=0"`
 	Price         float64  `json:"price" validate:"required,numeric,gt=0"`
 	Description   string   `json:"description" validate:"required"`
 	Specification string   `json:"specification" validate:"required"`

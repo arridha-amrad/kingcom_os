@@ -14,6 +14,7 @@ type Product struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 
 	Name          string          `json:"name"`
+	Weight        float64         `json:"weight" gorm:"default:0"`
 	Slug          string          `json:"slug"`
 	Price         float64         `json:"price"`
 	Description   string          `json:"description"`

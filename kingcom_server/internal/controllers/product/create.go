@@ -54,7 +54,17 @@ func (ctrl *productController) Create(c *gin.Context) {
 		c.JSON(http.StatusForbidden, gin.H{"error": "you are not admin"})
 		return
 	}
-	if err := ctrl.productService.StoreNewProduct(c.Request.Context(), services.StoreNewProductParams(body)); err != nil {
+	params := services.StoreNewProductParams{
+		Name:          body.Name,
+		Weight:        body.Weight,
+		Price:         body.Price,
+		Description:   body.Description,
+		Specification: body.Specification,
+		Stock:         body.Stock,
+		VideoUrl:      body.VideoUrl,
+		Images:        body.Images,
+	}
+	if err := ctrl.productService.StoreNewProduct(c.Request.Context(), params); err != nil {
 		log.Println("Failed to store the product")
 		c.JSON(http.StatusForbidden, gin.H{"error": err.Error()})
 		return

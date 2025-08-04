@@ -5,13 +5,17 @@ export const setAccessToken = (newToken: string) =>
   (accToken = `Bearer ${newToken}`);
 export const getAccessToken = () => accToken;
 
+const baseApiUrl = import.meta.env.VITE_BASE_SERVER_URL;
+const apiVersion = import.meta.env.VITE_API_VERSION;
+const baseURL = `${baseApiUrl}/api/${apiVersion}`;
+
 export const publicAxios = axios.create({
-  baseURL: '/api',
+  baseURL,
   withCredentials: true,
 });
 
 export const privateAxios = axios.create({
-  baseURL: '/api',
+  baseURL,
   withCredentials: true,
 });
 privateAxios.interceptors.request.use(

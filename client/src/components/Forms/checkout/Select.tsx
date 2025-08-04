@@ -26,7 +26,7 @@ export default function CheckoutSelect({ label, options, setId }: Props) {
               '*:text-background',
             )}
           >
-            <option value={undefined}>---Select {label}</option>
+            <option value={undefined}>-- Select {label}</option>
             {options?.map((o, i) => (
               <option key={i} value={o.id}>
                 {o.name}

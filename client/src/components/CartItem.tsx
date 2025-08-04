@@ -15,7 +15,7 @@ interface Props {
 
 function CartItem({
   item: {
-    Product: { discount, image, price, name },
+    Product: { discount, image, price, name, weight },
     quantity,
     id,
   },
@@ -63,6 +63,7 @@ function CartItem({
             </p>
           </div>
           <p>Categories : Motherboard</p>
+          <p>Weight : {weight} gram</p>
         </div>
         <div className="flex flex-col gap-1 sm:flex-row justify-between sm:items-center w-full">
           <h2 className="font-bold text-2xl">
