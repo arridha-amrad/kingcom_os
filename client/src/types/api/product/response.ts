@@ -26,7 +26,7 @@ export interface Product {
   weight: number;
   // coming soon
   average_rating?: number | null;
-  discount?: number | null;
+  discount: number;
 }
 
 export interface ProductImage {

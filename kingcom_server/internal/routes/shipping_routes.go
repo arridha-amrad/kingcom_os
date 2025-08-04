@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"kingcom_server/internal/services"
 	"kingcom_server/internal/utils"
 	"log"
 	"net/http"
@@ -25,12 +26,13 @@ type ShippingRoutesParams struct {
 	*RoutesParams
 	RajaOngkirApiKey string
 	Utils            utils.IUtils
+	RedisService     services.IRedisService
 }
 
 func SetShippingRoutes(params ShippingRoutesParams) {
 	r := params.Route.Group("/shipping")
 	{
-		r.GET("/get-provinces", func(ctx *gin.Context) { GetProvinces(ctx, params.Utils, params.RajaOngkirApiKey) })
+		r.GET("/get-provinces", func(ctx *gin.Context) { GetProvinces(ctx, params.Utils, params.RedisService, params.RajaOngkirApiKey) })
 		r.GET("/get-cities/:provinceID", func(ctx *gin.Context) { GetCities(ctx, params.Utils, params.RajaOngkirApiKey) })
 		r.GET("/get-districts/:cityID", func(ctx *gin.Context) { GetDistricts(ctx, params.Utils, params.RajaOngkirApiKey) })
 		r.POST("/calc-cost", func(ctx *gin.Context) { CalcCost(ctx, params.Utils, params.RajaOngkirApiKey) })
@@ -126,17 +128,34 @@ func GetCities(c *gin.Context, utils utils.IUtils, key string) {
 	c.JSON(http.StatusOK, response)
 }
 
-func GetProvinces(c *gin.Context, utils utils.IUtils, key string) {
+func GetProvinces(c *gin.Context, utils utils.IUtils, redisService services.IRedisService, key string) {
 	url := fmt.Sprintf("%s/province", destinationUrl)
+
+	data, err := redisService.GetProvinces()
+	if err != nil {
+		utils.RespondWithError(c, http.StatusInternalServerError, err, "Failed to get provinces from Redis")
+		return
+	}
+	if len(data.Data) > 0 {
+		c.JSON(http.StatusOK, data)
+		return
+	}
+
 	body, err := runRequest(url, key)
 	if err != nil {
 		utils.RespondWithError(c, http.StatusInternalServerError, err, "Failed to fetch provinces")
 		return
 	}
-	var response ProvinceResponse
+	var response services.RajaOngkirResponse
 	if err := json.Unmarshal(body, &response); err != nil {
 		utils.RespondWithError(c, http.StatusInternalServerError, err, "failed to unmarshal json")
 		return
+	}
+	if response.Meta.Code == 200 {
+		if err := redisService.SaveProvinces(response); err != nil {
+			utils.RespondWithError(c, http.StatusInternalServerError, err, "Failed to save provinces to Redis")
+			return
+		}
 	}
 	c.JSON(http.StatusOK, response)
 }
@@ -179,14 +198,6 @@ type CityDistrictResponse struct {
 		ID      int    `json:"id"`
 		Name    string `json:"name"`
 		ZipCode string `json:"zip_code"`
-	} `json:"data"`
-}
-
-type ProvinceResponse struct {
-	MetaResponse
-	Data []struct {
-		ID   int    `json:"id"`
-		Name string `json:"name"`
 	} `json:"data"`
 }
 

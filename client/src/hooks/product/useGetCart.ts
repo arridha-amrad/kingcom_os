@@ -1,4 +1,4 @@
-import { privateAxios } from '@/lib/axiosInterceptor';
+import { getAccessToken, privateAxios } from '@/lib/axiosInterceptor';
 import type { User } from '@/types/api/auth';
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import { AxiosError } from 'axios';
@@ -17,6 +17,7 @@ export function useGetCart(auth: User | undefined) {
 }
 
 export const getCart = async () => {
+  if (!getAccessToken()) return [];
   try {
     const res = await privateAxios.get<GetCartResponse>('/products/cart');
     const data = res.data;

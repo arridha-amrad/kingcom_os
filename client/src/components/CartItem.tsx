@@ -8,6 +8,7 @@ import {
   type Cart,
 } from '@/hooks/product/useGetCart';
 import { useQueryClient } from '@tanstack/react-query';
+import { formatToIdr } from '@/utils';
 
 interface Props {
   item: Cart;
@@ -55,7 +56,7 @@ function CartItem({
           </button>
         </div>
         <div className="text-foreground/50">
-          <p>Price : {price}</p>
+          <p>Price : {formatToIdr(price)}</p>
           <div className="inline ">
             Discount :
             <p className="bg-red-500/10 w-fit inline text-red-500 rounded-full font-medium text-xs ml-2 py-1 px-2">
@@ -67,8 +68,10 @@ function CartItem({
         </div>
         <div className="flex flex-col gap-1 sm:flex-row justify-between sm:items-center w-full">
           <h2 className="font-bold text-2xl">
-            $
-            {Math.ceil((price - (price * discount) / 100) * quantity * 10) / 10}
+            {formatToIdr(
+              Math.ceil((price - (price * discount) / 100) * quantity * 10) /
+                10,
+            )}
           </h2>
           <ButtonQuantity
             onDecrease={onDecrease}

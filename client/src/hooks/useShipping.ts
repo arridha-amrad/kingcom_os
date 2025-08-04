@@ -1,5 +1,5 @@
 import { publicAxios } from '@/lib/axiosInterceptor';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 export function useGetProvince() {
   return useQuery({
@@ -53,20 +53,13 @@ export function useGetDistricts(cityId: Nun) {
   });
 }
 
-export function useGetCosts(originId: Nun, weight: Nun, destinationId: Nun) {
-  return useQuery({
-    queryKey: ['shipping-cost', originId, destinationId, weight],
-    enabled: !!originId && !!destinationId && !!weight,
-    staleTime: 1000 * 60 * 5,
-    queryFn: async () => {
+export function useFindServices() {
+  return useMutation({
+    mutationFn: async (params: ShippingCostParams) => {
       try {
         const res = await publicAxios.post<ShippingCostResponse>(
           '/shipping/calc-cost',
-          {
-            originId,
-            destinationId,
-            weight,
-          },
+          params,
         );
         const data = res.data.data;
         if (data.length > 5) {
@@ -81,6 +74,12 @@ export function useGetCosts(originId: Nun, weight: Nun, destinationId: Nun) {
 }
 
 export type Courier = ShippingCostResponse['data'][number];
+
+type ShippingCostParams = {
+  originId: number;
+  destinationId: number;
+  weight: number;
+};
 
 type ShippingCostResponse = {
   data: {
@@ -98,6 +97,11 @@ type Response = {
     id: number;
     name: string;
   }[];
+};
+
+export type IdWithName = {
+  id: number;
+  name: string;
 };
 
 type Nun = number | undefined | null;

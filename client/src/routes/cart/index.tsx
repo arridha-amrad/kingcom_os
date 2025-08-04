@@ -1,25 +1,27 @@
 import Carts from '@/components/Cart';
 import OrderSummary from '@/components/OrderSummary';
 import Spinner from '@/components/Spinner';
+import { me } from '@/hooks/auth/useGetAuth';
 import { getCart } from '@/hooks/product/useGetCart';
-import { getProvinces } from '@/hooks/useShipping';
 import { createFileRoute } from '@tanstack/react-router';
 import { ChevronRight } from 'lucide-react';
 
 export const Route = createFileRoute('/cart/')({
   component: RouteComponent,
-  beforeLoad(ctx) {
-    ctx.context.queryClient.ensureQueryData({ queryKey: ['me'] });
-  },
-  loader({ context }) {
-    context.queryClient.ensureQueryData({
+
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData({
+      queryKey: ['me'],
+      queryFn: me,
+    });
+    await context.queryClient.ensureQueryData({
       queryKey: ['get-cart'],
       queryFn: getCart,
     });
-    context.queryClient.ensureQueryData({
-      queryKey: ['shipping-province'],
-      queryFn: getProvinces,
-    });
+    // context.queryClient.ensureQueryData({
+    //   queryKey: ['shipping-province'],
+    //   queryFn: getProvinces,
+    // });
   },
   pendingComponent: () => {
     return (

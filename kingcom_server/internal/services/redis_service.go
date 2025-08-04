@@ -1,8 +1,10 @@
 package services
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
+	"kingcom_server/internal/constants"
 	"kingcom_server/internal/repositories"
 	"time"
 )
@@ -28,12 +30,44 @@ type IRedisService interface {
 	SavePasswordResetToken(params PasswordResetData) error
 	DeletePasswordResetToken(hashedToken string) error
 	GetPasswordResetToken(hashedToken string) (PasswordResetData, error)
+	// raja ongkir
+	SaveProvinces(data RajaOngkirResponse) error
+	GetProvinces() (RajaOngkirResponse, error)
 }
 
 func NewRedisService(redisRepository repositories.IRedisRepository) IRedisService {
 	return &redisService{
 		redisRepository: redisRepository,
 	}
+}
+
+func (s *redisService) GetProvinces() (RajaOngkirResponse, error) {
+	key := constants.RAJA_ONGKIR_PROVINCES
+	raw, err := s.redisRepository.Get(key)
+	if err != nil {
+		return RajaOngkirResponse{}, fmt.Errorf("failed to get provinces from redis: %w", err)
+	}
+	if len(raw) == 0 {
+		return RajaOngkirResponse{}, nil
+	}
+	var provinces RajaOngkirResponse
+	if err := json.Unmarshal([]byte(raw), &provinces); err != nil {
+		return RajaOngkirResponse{}, fmt.Errorf("failed to unmarshal provinces data: %w", err)
+	}
+	return provinces, nil
+}
+
+func (s *redisService) SaveProvinces(data RajaOngkirResponse) error {
+	key := constants.RAJA_ONGKIR_PROVINCES
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		return fmt.Errorf("failed to marshal provinces data: %w", err)
+	}
+	err = s.redisRepository.Set(key, string(jsonData), RajaOngkirTTL)
+	if err != nil {
+		return fmt.Errorf("failed to save provinces in redis: %w", err)
+	}
+	return nil
 }
 
 func (s *redisService) SavePasswordResetToken(params PasswordResetData) error {
@@ -229,4 +263,21 @@ var (
 	RefreshTokenTTL       = 24 * 7 * time.Hour
 	VerificationTokenTTL  = 30 * time.Minute
 	PasswordResetTokenTTL = 30 * time.Minute
+	RajaOngkirTTL         = 1 * time.Hour
 )
+
+type RajaOngkirResponse struct {
+	MetaResponse
+	Data []struct {
+		ID   int    `json:"id"`
+		Name string `json:"name"`
+	} `json:"data"`
+}
+
+type MetaResponse struct {
+	Meta struct {
+		Message string `json:"message"`
+		Code    int    `json:"code"`
+		Status  string `json:"status"`
+	} `json:"meta"`
+}

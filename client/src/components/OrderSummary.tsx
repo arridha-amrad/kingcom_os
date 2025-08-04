@@ -1,8 +1,10 @@
-import { useGetCart } from '@/hooks/product/useGetCart';
-import { ArrowRightIcon, Tag } from 'lucide-react';
-import Spinner from './Spinner';
 import { useGetAuth } from '@/hooks/auth/useGetAuth';
+import { useGetCart } from '@/hooks/product/useGetCart';
+import { formatToIdr } from '@/utils';
+import { Tag } from 'lucide-react';
 import ModalCheckout from './Modals/ModalCheckout';
+import ModalChooseCourier from './Modals/ModalChooseCourier';
+import Spinner from './Spinner';
 
 function OrderSummary() {
   const { data: auth } = useGetAuth();
@@ -27,7 +29,7 @@ function OrderSummary() {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-foreground/60 text-xl">SubTotal</h2>
-          <h2 className="text-xl font-bold">${subTotal}</h2>
+          <h2 className="text-xl font-bold">{formatToIdr(subTotal)}</h2>
         </div>
         {/* {discount && (
           <div className="flex items-center justify-between">
@@ -39,13 +41,14 @@ function OrderSummary() {
         )} */}
         <div className="flex items-center justify-between">
           <h2 className="text-foreground/60 text-xl">Delivery Fee</h2>
-          <h2 className="text-xl font-bold">$5</h2>
+          <ModalChooseCourier />
+          {/* <h2 className="text-xl font-bold">$5</h2> */}
         </div>
       </div>
       <div className="w-full h-px bg-foreground/20"></div>
       <div className="flex items-center justify-between">
         <h2 className="text-xl">Total</h2>
-        <h2 className="text-2xl font-bold">${subTotal}</h2>
+        <h2 className="text-2xl font-bold">{formatToIdr(subTotal)}</h2>
       </div>
       <div className="h-12 w-full flex gap-4 items-center">
         <div className="flex-2 h-full">

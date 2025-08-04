@@ -13,6 +13,8 @@ type IRedisRepository interface {
 	HGet(key string, field string) (string, error)
 	Delete(key string) error
 	HGetAll(key string) (map[string]string, error)
+	Set(key string, value string, expiry time.Duration) error
+	Get(key string) (string, error)
 }
 
 type redisRepository struct {
@@ -23,6 +25,27 @@ func NewRedisRepository(rdb *redis.Client) IRedisRepository {
 	return &redisRepository{
 		rdb: rdb,
 	}
+}
+
+func (s *redisRepository) Get(key string) (string, error) {
+	ctx := context.Background()
+	result, err := s.rdb.Get(ctx, key).Result()
+	if err != nil {
+		if err == redis.Nil {
+			return "", fmt.Errorf("key %s not found: %w", key, err)
+		}
+		return "", fmt.Errorf("redis Get failed: %w", err)
+	}
+	return result, nil
+}
+
+func (s *redisRepository) Set(key string, value string, expiry time.Duration) error {
+	ctx := context.Background()
+	err := s.rdb.Set(ctx, key, value, expiry).Err()
+	if err != nil {
+		return fmt.Errorf("failed to set key in redis: %w", err)
+	}
+	return nil
 }
 
 func (s *redisRepository) Delete(key string) error {

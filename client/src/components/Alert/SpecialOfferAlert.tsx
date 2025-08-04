@@ -1,16 +1,24 @@
-'use client'
+'use client';
 
-import { X } from 'lucide-react'
-import { useState } from 'react'
+import { X } from 'lucide-react';
+import { useEffect, useState } from 'react';
 
 function SpecialOfferAlert() {
-  const [isShow, setIsShow] = useState(true)
+  const [isShow, setIsShow] = useState(true);
+
+  useEffect(() => {
+    const storedValue = localStorage.getItem('special-offer-alert');
+    if (storedValue) {
+      setIsShow(JSON.parse(storedValue));
+    }
+  }, []);
 
   const toggleAlert = () => {
-    setIsShow((val) => !val)
-  }
+    setIsShow((val) => !val);
+    localStorage.setItem('special-offer-alert', JSON.stringify(!isShow));
+  };
 
-  if (!isShow) return null
+  if (!isShow) return null;
 
   return (
     <section className="bg-foreground text-background mx-4">
@@ -24,7 +32,7 @@ function SpecialOfferAlert() {
         </button>
       </div>
     </section>
-  )
+  );
 }
 
-export default SpecialOfferAlert
+export default SpecialOfferAlert;
