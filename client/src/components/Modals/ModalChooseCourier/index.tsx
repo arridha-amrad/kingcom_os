@@ -15,12 +15,24 @@ import {
   DialogTitle,
 } from '@headlessui/react';
 import { Truck, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type Dispatch, type SetStateAction } from 'react';
 import toast from 'react-hot-toast';
 import AvailableCouriers from './AvailableCouriers';
 import ShippingAddress from './ShippingAddress';
 
-export default function ModalChooseCourier() {
+interface Props {
+  setDeliveryFee: (fee: number) => void;
+  setAddress: Dispatch<SetStateAction<string>>;
+  setCourier: Dispatch<SetStateAction<Courier | null>>;
+  courier: Courier | null;
+}
+
+export default function ModalChooseCourier({
+  setDeliveryFee,
+  setAddress,
+  setCourier,
+  courier,
+}: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const { data: authUser } = useGetAuth();
   const { data: cart } = useGetCart(authUser);
@@ -40,7 +52,6 @@ export default function ModalChooseCourier() {
   const { data: districts } = useGetDistricts(cityId);
   const { mutateAsync, isPending } = useFindServices();
 
-  const [courier, setCourier] = useState<null | Courier>(null);
   const [services, setServices] = useState<Courier[]>([]);
 
   const findServices = async () => {
@@ -69,6 +80,10 @@ export default function ModalChooseCourier() {
     setCityId(null);
     setDistrictId(null);
     setCourier(null);
+  };
+
+  const selectService = () => {
+    closeModal();
   };
 
   if (!provinces) return null;
@@ -110,6 +125,7 @@ export default function ModalChooseCourier() {
                 costs={services}
                 courier={courier}
                 setCourier={setCourier}
+                selectService={selectService}
               />
             ) : (
               <ShippingAddress
@@ -121,6 +137,8 @@ export default function ModalChooseCourier() {
                 setDistrictId={setDistrictId}
                 findServices={findServices}
                 isPending={isPending}
+                address={address}
+                setAddress={setAddress}
               />
             )}
           </DialogPanel>

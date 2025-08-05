@@ -1,15 +1,20 @@
+import type { Courier } from '@/hooks/useShipping';
 import { formatToIdr } from '@/utils';
 import { Radio, RadioGroup } from '@headlessui/react';
+
+interface Props {
+  costs: Courier[];
+  courier: Courier | null;
+  setCourier: (courier: Courier) => void;
+  selectService: () => void;
+}
 
 const AvailableCouriers = ({
   costs,
   courier,
   setCourier,
-}: {
-  costs: any[];
-  courier: any;
-  setCourier: (courier: any) => void;
-}) => {
+  selectService,
+}: Props) => {
   return (
     <div className="mt-4">
       <div className="text-sm font-medium mb-2">Available services</div>
@@ -36,7 +41,7 @@ const AvailableCouriers = ({
           </Radio>
         ))}
       </RadioGroup>
-      <div className="my-4">
+      <div onClick={selectService} className="my-4">
         <button className="bg-foreground disabled:brightness-75 text-background w-full rounded-2xl py-2 font-medium hover:bg-foreground/90 transition-colors ease-in duration-100">
           Continue
         </button>

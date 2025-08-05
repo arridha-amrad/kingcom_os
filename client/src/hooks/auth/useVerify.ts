@@ -21,7 +21,7 @@ export const useVerify = () => {
       } catch (err: unknown) {
         console.log(err);
         if (err instanceof AxiosError) {
-          throw new Error(err.message);
+          throw new Error(err.response?.data.error);
         }
       }
     },

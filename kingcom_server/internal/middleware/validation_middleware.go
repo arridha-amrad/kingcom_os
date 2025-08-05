@@ -28,10 +28,19 @@ type IValidationMiddleware interface {
 	ResendVerification(c *gin.Context)
 	CreateProduct(c *gin.Context)
 	AddToCart(c *gin.Context)
+	CalcCost(c *gin.Context)
+	CreateOrder(c *gin.Context)
 }
 
 func NewValidationMiddleware(validate *validator.Validate) IValidationMiddleware {
 	return &validationMiddleware{validate: validate}
+}
+
+func (m *validationMiddleware) CreateOrder(c *gin.Context) {
+	var input dto.CreateOrderRequest
+	m.runValidation(c, &input)
+	c.Set(constants.VALIDATED_BODY, input)
+	c.Next()
 }
 
 func (m *validationMiddleware) runValidation(c *gin.Context, input any) {
@@ -72,6 +81,13 @@ func (m *validationMiddleware) runValidation(c *gin.Context, input any) {
 		c.Abort()
 		return
 	}
+}
+
+func (m *validationMiddleware) CalcCost(c *gin.Context) {
+	var input dto.CalcCost
+	m.runValidation(c, &input)
+	c.Set(constants.VALIDATED_BODY, input)
+	c.Next()
 }
 
 func (m *validationMiddleware) ForgotPassword(c *gin.Context) {

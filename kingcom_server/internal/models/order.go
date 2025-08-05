@@ -1,7 +1,7 @@
 package models
 
 import (
-	"strconv"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -11,50 +11,71 @@ import (
 type OrderStatus string
 
 const (
-	OrderStatusPending    OrderStatus = "pending"
-	OrderStatusProcessing OrderStatus = "processing"
-	OrderStatusShipped    OrderStatus = "shipped"
-	OrderStatusDelivered  OrderStatus = "delivered"
-	OrderStatusCancelled  OrderStatus = "cancelled"
-	OrderStatusRefunded   OrderStatus = "refunded"
+	OrderStatusPending   OrderStatus = "pending"
+	OrderStatusPaid      OrderStatus = "paid"
+	OrderStatusShipped   OrderStatus = "shipped"
+	OrderStatusDelivered OrderStatus = "delivered"
+	OrderStatusCanceled  OrderStatus = "canceled"
 )
 
 type Order struct {
-	gorm.Model
-	UserID            uuid.UUID   `gorm:"not null" json:"user_id"`
-	OrderNumber       string      `gorm:"unique;not null" json:"order_number"`
-	Status            OrderStatus `gorm:"type:varchar(20);default:'pending'" json:"status"`
-	Subtotal          float64     `gorm:"type:decimal(10,2);not null" json:"subtotal"`
-	Tax               float64     `gorm:"type:decimal(10,2);not null;default:0" json:"tax"`
-	ShippingCost      float64     `gorm:"type:decimal(10,2);not null" json:"shipping_cost"`
-	Total             float64     `gorm:"type:decimal(10,2);not null" json:"total"`
-	PaymentMethod     string      `gorm:"type:varchar(50)" json:"payment_method"`
-	PaymentStatus     string      `gorm:"type:varchar(50);default:'unpaid'" json:"payment_status"`
-	ShippingAddress   string      `gorm:"type:text;not null" json:"shipping_address"`
-	BillingAddress    string      `gorm:"type:text" json:"billing_address"`
-	TrackingNumber    string      `gorm:"type:varchar(100)" json:"tracking_number"`
-	EstimatedDelivery *time.Time  `json:"estimated_delivery"`
-	DeliveredAt       *time.Time  `json:"delivered_at"`
+	// Auto generated fields
+	ID          uuid.UUID   `gorm:"column:id;type:uuid;primaryKey" json:"id"`
+	OrderNumber string      `gorm:"column:order_number;unique;not null" json:"orderNumber"`
+	Status      OrderStatus `gorm:"column:status;type:varchar(20);default:'pending'" json:"status"`
+
+	// filled by user
+	UserID     uuid.UUID `gorm:"column:user_id;type:uuid;not null" json:"userId"`
+	Total      int64     `gorm:"column:total;not null" json:"total"`
+	ShippingID uint      `gorm:"column:shipping_id" json:"shippingId"`
+
+	PaymentMethod  string `gorm:"column:payment_method;type:varchar(50)" json:"paymentMethod"`
+	BillingAddress string `gorm:"column:billing_address;type:text" json:"billingAddress"`
+
+	// Timestamps for order lifecycle
+	CreatedAt   time.Time `gorm:"column:created_at" json:"createdAt"`
+	PaidAt      time.Time `gorm:"column:paid_at" json:"paidAt"`
+	ShippedAt   time.Time `gorm:"column:shipped_at" json:"shippedAt"`
+	DeliveredAt time.Time `gorm:"column:delivered_at" json:"deliveredAt"`
 
 	// Relationships
 	User       User        `gorm:"foreignKey:UserID" json:"-"`
-	OrderItems []OrderItem `gorm:"foreignKey:OrderID" json:"order_items"`
+	OrderItems []OrderItem `gorm:"foreignKey:OrderID;constraint:onDelete:CASCADE;" json:"order_items"`
+	Shipping   Shipping    `gorm:"foreignKey:OrderID;constraint:onDelete:CASCADE;" json:"shipping"`
 }
 
 type OrderItem struct {
 	gorm.Model
-	OrderID    uint      `gorm:"not null" json:"order_id"`
-	ProductID  uuid.UUID `gorm:"not null" json:"product_id"`
-	Quantity   int       `gorm:"not null" json:"quantity"`
-	Price      float64   `gorm:"type:decimal(10,2);not null" json:"price"`
-	Discount   int       `gorm:"default:0" json:"discount"`
-	TotalPrice float64   `gorm:"type:decimal(10,2);not null" json:"total_price"`
+	OrderID   uuid.UUID `gorm:"not null;constraint:onDelete:CASCADE;" json:"order_id"`
+	ProductID uuid.UUID `gorm:"not null" json:"product_id"`
+	Quantity  int       `gorm:"not null" json:"quantity"`
 
 	// Relationships
 	Product Product `gorm:"foreignKey:ProductID" json:"product"`
+	Order   Order   `gorm:"foreignKey:OrderID" json:"order"`
 }
 
-func (o *Order) BeforeCreate(tx *gorm.DB) (err error) {
-	o.OrderNumber = "ORD-" + time.Now().Format("20060102") + "-" + strconv.FormatInt(time.Now().UnixNano()%10000, 10)
+type Shipping struct {
+	ID          uint    `gorm:"primaryKey" json:"id"`
+	Name        string  `json:"name"`
+	Code        string  `json:"code"`
+	Service     string  `json:"service"`
+	Description string  `json:"description"`
+	Cost        float64 `json:"cost"`
+	Etd         string  `json:"etd"`
+	Address     string  `json:"address"`
+}
+
+func (u *Order) BeforeCreate(tx *gorm.DB) (err error) {
+	if u.ID == uuid.Nil {
+		u.ID = uuid.New()
+	}
+	u.OrderNumber = generateOrderNumber()
 	return
+}
+
+func generateOrderNumber() string {
+	timestamp := time.Now().UnixNano()
+	randomPart := uuid.New().String()[0:8]
+	return fmt.Sprintf("ORD-%d-%s", timestamp, randomPart)
 }

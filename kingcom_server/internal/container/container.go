@@ -2,6 +2,7 @@ package container
 
 import (
 	"kingcom_server/internal/config"
+	"kingcom_server/internal/controllers"
 	"kingcom_server/internal/controllers/auth"
 	"kingcom_server/internal/controllers/product"
 	"kingcom_server/internal/controllers/user"
@@ -31,6 +32,7 @@ func NewContainer(db *gorm.DB, rdb *redis.Client, validate *validator.Validate, 
 	productRepo := repositories.NewProductRepository(db)
 	productImagesRepo := repositories.NewProductImageRepository(db)
 	cartRepo := repositories.NewCartRepository(db)
+	orderRepo := repositories.NewOrderRepository(db)
 
 	// Utilities
 	utilities := utils.NewUtilities(config.JWtSecretKey, config.AppUri, config.GoogleOAuth2)
@@ -44,6 +46,7 @@ func NewContainer(db *gorm.DB, rdb *redis.Client, validate *validator.Validate, 
 	passwordService := services.NewPasswordService()
 	productService := services.NewProductService(productImagesRepo, productRepo, txManager, utilities)
 	cartService := services.NewCartService(cartRepo, txManager)
+	orderService := services.NewOrderService(orderRepo, txManager)
 
 	// Controllers
 	userCtrl := user.NewUserController(userService)
@@ -56,6 +59,12 @@ func NewContainer(db *gorm.DB, rdb *redis.Client, validate *validator.Validate, 
 		utilities,
 	)
 	productCtrl := product.NewProductController(productService, userService, cartService)
+	shippingCtrl := controllers.NewShippingController(
+		redisService,
+		config.RajaOngkirApiKey,
+		utilities,
+	)
+	orderCtrl := controllers.NewOrderController(orderService)
 
 	// Middleware
 	validationMiddleware := middleware.NewValidationMiddleware(validate)
@@ -63,9 +72,11 @@ func NewContainer(db *gorm.DB, rdb *redis.Client, validate *validator.Validate, 
 
 	return &Container{
 		Controllers: &Controllers{
-			Auth:    authCtrl,
-			User:    userCtrl,
-			Product: productCtrl,
+			Auth:     authCtrl,
+			User:     userCtrl,
+			Product:  productCtrl,
+			Shipping: shippingCtrl,
+			Order:    orderCtrl,
 		},
 		Middlewares: &Middlewares{
 			Validation: validationMiddleware,
@@ -82,7 +93,9 @@ type Middlewares struct {
 }
 
 type Controllers struct {
-	Auth    auth.IAuthController
-	User    user.IUserController
-	Product product.IProductController
+	Auth     auth.IAuthController
+	User     user.IUserController
+	Product  product.IProductController
+	Shipping controllers.IShippingController
+	Order    controllers.IOrderController
 }

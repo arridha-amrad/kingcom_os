@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"kingcom_server/internal/constants"
 	"kingcom_server/internal/repositories"
+	"log"
 	"time"
 )
 
@@ -45,6 +46,7 @@ func (s *redisService) GetProvinces() (RajaOngkirResponse, error) {
 	key := constants.RAJA_ONGKIR_PROVINCES
 	raw, err := s.redisRepository.Get(key)
 	if err != nil {
+		log.Println(err.Error())
 		return RajaOngkirResponse{}, fmt.Errorf("failed to get provinces from redis: %w", err)
 	}
 	if len(raw) == 0 {
