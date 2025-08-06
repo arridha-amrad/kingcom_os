@@ -1,33 +1,26 @@
 import CheckoutSelect from '@/components/Forms/checkout/Select';
-import type { IdWithName } from '@/hooks/useShipping';
+import { useOrder } from '@/components/Providers/OrderProvider';
+import {
+  useFindServices,
+  useGetCities,
+  useGetDistricts,
+  useGetProvince,
+} from '@/hooks/useShipping';
 import { Field, Label, Textarea } from '@headlessui/react';
-import type { Dispatch, SetStateAction } from 'react';
+import { useState } from 'react';
 
-interface Props {
-  provinces: IdWithName[];
-  cities?: IdWithName[];
-  districts?: IdWithName[];
-  setProvinceId: Dispatch<React.SetStateAction<number | null>>;
-  setCityId: Dispatch<React.SetStateAction<number | null>>;
-  setDistrictId: Dispatch<React.SetStateAction<number | null>>;
-  findServices: () => Promise<void>;
-  isPending: boolean;
-  address: string;
-  setAddress: Dispatch<SetStateAction<string>>;
-}
+const ShippingAddress = () => {
+  const [provinceId, setProvinceId] = useState<null | number>(null);
+  const [cityId, setCityId] = useState<null | number>(null);
 
-const ShippingAddress = ({
-  provinces,
-  cities,
-  districts,
-  setProvinceId,
-  setCityId,
-  setDistrictId,
-  findServices,
-  isPending,
-  address,
-  setAddress,
-}: Props) => {
+  const { data: provinces } = useGetProvince();
+  const { data: cities } = useGetCities(provinceId);
+  const { data: districts } = useGetDistricts(cityId);
+
+  const { setAddress, address, setBuyerDistrictId, findAvailableCouriers } =
+    useOrder();
+  const { isPending } = useFindServices();
+
   return (
     <div className="w-full space-y-2">
       <CheckoutSelect
@@ -37,7 +30,7 @@ const ShippingAddress = ({
       />
       <CheckoutSelect setId={setCityId} label="City" options={cities} />
       <CheckoutSelect
-        setId={setDistrictId}
+        setId={setBuyerDistrictId}
         label="District"
         options={districts}
       />
@@ -54,7 +47,7 @@ const ShippingAddress = ({
       </Field>
       <div className="my-4">
         <button
-          onClick={findServices}
+          onClick={findAvailableCouriers}
           disabled={isPending}
           className="bg-foreground disabled:brightness-75 text-background w-full rounded-2xl py-2 font-medium hover:bg-foreground/90 transition-colors ease-in duration-100"
         >

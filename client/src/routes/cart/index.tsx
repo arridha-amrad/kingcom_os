@@ -1,5 +1,6 @@
 import Carts from '@/components/Cart';
 import OrderSummary from '@/components/OrderSummary';
+import OrderProvider from '@/components/Providers/OrderProvider';
 import Spinner from '@/components/Spinner';
 import { me } from '@/hooks/auth/useGetAuth';
 import { getCart } from '@/hooks/product/useGetCart';
@@ -48,7 +49,9 @@ function RouteComponent() {
         <div className="flex lg:flex-row flex-col pt-6 gap-8">
           <Carts />
           <div className="w-full lg:max-w-md">
-            <OrderSummary />
+            <OrderProvider>
+              <OrderSummary />
+            </OrderProvider>
           </div>
         </div>
       </section>

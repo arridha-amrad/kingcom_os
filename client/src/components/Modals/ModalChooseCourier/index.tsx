@@ -1,12 +1,4 @@
-import { useGetAuth } from '@/hooks/auth/useGetAuth';
-import { useGetCart } from '@/hooks/product/useGetCart';
-import {
-  useFindServices,
-  useGetCities,
-  useGetDistricts,
-  useGetProvince,
-  type Courier,
-} from '@/hooks/useShipping';
+import { useOrder } from '@/components/Providers/OrderProvider';
 import {
   Description,
   Dialog,
@@ -15,78 +7,20 @@ import {
   DialogTitle,
 } from '@headlessui/react';
 import { Truck, X } from 'lucide-react';
-import { useState, type Dispatch, type SetStateAction } from 'react';
-import toast from 'react-hot-toast';
+import { useState } from 'react';
 import AvailableCouriers from './AvailableCouriers';
 import ShippingAddress from './ShippingAddress';
 
-interface Props {
-  setDeliveryFee: (fee: number) => void;
-  setAddress: Dispatch<SetStateAction<string>>;
-  setCourier: Dispatch<SetStateAction<Courier | null>>;
-  courier: Courier | null;
-}
-
-export default function ModalChooseCourier({
-  setDeliveryFee,
-  setAddress,
-  setCourier,
-  courier,
-}: Props) {
+export default function ModalChooseCourier({}) {
   const [isOpen, setIsOpen] = useState(false);
-  const { data: authUser } = useGetAuth();
-  const { data: cart } = useGetCart(authUser);
 
-  const originId = 1334;
-
-  const weight =
-    cart?.reduce((acc, item) => acc + item.Product.weight * item.quantity, 0) ??
-    0;
-
-  const [provinceId, setProvinceId] = useState<null | number>(null);
-  const [cityId, setCityId] = useState<null | number>(null);
-  const [districtId, setDistrictId] = useState<null | number>(null);
-
-  const { data: provinces } = useGetProvince();
-  const { data: cities } = useGetCities(provinceId);
-  const { data: districts } = useGetDistricts(cityId);
-  const { mutateAsync, isPending } = useFindServices();
-
-  const [services, setServices] = useState<Courier[]>([]);
-
-  const findServices = async () => {
-    if (!districtId || !weight || !originId) return;
-    const id = toast.loading('Finding available courier services...', {
-      removeDelay: 500,
-    });
-    try {
-      const result = await mutateAsync({
-        originId,
-        destinationId: districtId,
-        weight,
-      });
-      setServices(result);
-    } catch (error) {
-      console.error('Failed to fetch courier services:', error);
-      toast.error('Failed to fetch courier services', { id, removeDelay: 500 });
-    } finally {
-      toast.dismiss(id);
-    }
-  };
+  const { setCourier, availableCouriers, setBuyerDistrictId } = useOrder();
 
   const closeModal = () => {
     setIsOpen(false);
-    setProvinceId(null);
-    setCityId(null);
-    setDistrictId(null);
     setCourier(null);
+    setBuyerDistrictId(null);
   };
-
-  const selectService = () => {
-    closeModal();
-  };
-
-  if (!provinces) return null;
 
   return (
     <>
@@ -120,26 +54,10 @@ export default function ModalChooseCourier({
             <Description className="mt-2 mb-8">
               Select your shipping address and courier service.
             </Description>
-            {services.length > 0 ? (
-              <AvailableCouriers
-                costs={services}
-                courier={courier}
-                setCourier={setCourier}
-                selectService={selectService}
-              />
+            {availableCouriers.length > 0 ? (
+              <AvailableCouriers closeModal={closeModal} />
             ) : (
-              <ShippingAddress
-                provinces={provinces}
-                cities={cities}
-                districts={districts}
-                setProvinceId={setProvinceId}
-                setCityId={setCityId}
-                setDistrictId={setDistrictId}
-                findServices={findServices}
-                isPending={isPending}
-                address={address}
-                setAddress={setAddress}
-              />
+              <ShippingAddress />
             )}
           </DialogPanel>
         </div>
