@@ -16,16 +16,20 @@ export default function ModalChooseCourier({}) {
 
   const { setCourier, availableCouriers, setBuyerDistrictId } = useOrder();
 
-  const closeModal = () => {
-    setIsOpen(false);
+  const openModal = () => {
+    setIsOpen(true);
     setCourier(null);
     setBuyerDistrictId(null);
+  };
+
+  const closeModal = () => {
+    setIsOpen(false);
   };
 
   return (
     <>
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={openModal}
         className="bg-foreground text-background font-medium rounded-2xl px-4 py-2 flex items-center gap-2"
       >
         Choose Courier

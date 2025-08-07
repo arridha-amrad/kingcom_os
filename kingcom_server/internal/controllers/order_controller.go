@@ -4,6 +4,7 @@ import (
 	"kingcom_server/internal/constants"
 	"kingcom_server/internal/dto"
 	"kingcom_server/internal/services"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -40,7 +41,13 @@ func (ctrl *orderController) Create(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid type for validated body"})
 		return
 	}
-	tokenPayload, ok := value.(services.JWTPayload)
+
+	accTokenPayload, exist := c.Get(constants.ACCESS_TOKEN_PAYLOAD)
+	if !exist {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "validated body not exists"})
+		return
+	}
+	tokenPayload, ok := accTokenPayload.(services.JWTPayload)
 	if !ok {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token payload"})
 		return
@@ -50,16 +57,18 @@ func (ctrl *orderController) Create(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to parse to uuid"})
 		return
 	}
-	if err := ctrl.orderService.PlaceOrder(
-		c.Request.Context(),
-		userId,
-		body.Total,
-		body.Shipping,
-		body.Items,
-	); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
+	log.Println(userId)
+	log.Printf("%+v", body)
+	// if err := ctrl.orderService.PlaceOrder(
+	// 	c.Request.Context(),
+	// 	userId,
+	// 	body.Total,
+	// 	body.Shipping,
+	// 	body.Items,
+	// ); err != nil {
+	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	// 	return
+	// }
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Order placed successfully",
 	})

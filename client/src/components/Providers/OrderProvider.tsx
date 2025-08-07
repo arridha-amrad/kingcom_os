@@ -56,6 +56,7 @@ export default function OrderProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (courier && subTotal) {
+      setDeliveryFee(courier.cost);
       setTotal(subTotal + courier.cost);
     }
   }, [courier, subTotal]);
@@ -66,26 +67,27 @@ export default function OrderProvider({ children }: { children: ReactNode }) {
     if (!total || !carts || carts.length === 0 || !courier || !address) {
       return;
     }
-    const id = toast.loading('Processing your order...');
+    const id = toast.loading('Processing your order...', { removeDelay: 500 });
+    const body = {
+      total,
+      items: carts?.map((c) => ({
+        productId: c.Product.id,
+        quantity: c.quantity,
+      })),
+      shipping: {
+        ...courier,
+        address,
+      },
+    };
     try {
-      await mutateAsync({
-        total,
-        items: carts?.map((c) => ({
-          productId: c.Product.id,
-          quantity: c.quantity,
-        })),
-        shipping: {
-          ...courier,
-          address,
-        },
-      });
+      await mutateAsync(body);
+      console.log(body);
     } catch (err: unknown) {
       console.log(err);
       if (err instanceof Error) {
         toast.error(err.message, { id });
       }
-    } finally {
-      toast.dismiss(id);
+      toast.error('something went wrong', { id });
     }
   };
 

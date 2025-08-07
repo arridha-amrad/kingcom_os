@@ -2,9 +2,11 @@ import { formatToIdr } from '@/utils';
 import { ArrowRightIcon, Tag } from 'lucide-react';
 import ModalChooseCourier from './Modals/ModalChooseCourier';
 import { useOrder } from './Providers/OrderProvider';
+import { useCreateOrder } from '@/hooks/transactions/useCreateOrder';
 
 function OrderSummary() {
-  const { deliveryFee, subTotal, total, placeMyOrder } = useOrder();
+  const { deliveryFee, subTotal, total, placeMyOrder, courier } = useOrder();
+  const { isPending } = useCreateOrder();
 
   return (
     <div className="h-max w-full shrink-0 border space-y-6 border-foreground/20 p-6 rounded-3xl">
@@ -41,13 +43,17 @@ function OrderSummary() {
             </div>
           </div>
         </div>
-        <button className="flex-1 font-medium h-full bg-foreground rounded-full text-background">
+        <button
+          disabled={isPending}
+          className="flex-1 font-medium h-full bg-foreground rounded-full text-background"
+        >
           Apply
         </button>
       </div>
       <button
+        disabled={!courier || isPending}
         onClick={placeMyOrder}
-        className="h-15 rounded-full w-full flex items-center justify-center gap-4 bg-foreground font-medium text-background"
+        className="h-15 rounded-full w-full disabled:cursor-default flex items-center justify-center gap-4 bg-foreground font-medium text-background disabled:brightness-75"
       >
         <span className="font-medium">Go to Checkout</span>
         <ArrowRightIcon />
