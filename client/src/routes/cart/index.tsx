@@ -10,20 +10,20 @@ import { ChevronRight } from 'lucide-react';
 
 export const Route = createFileRoute('/cart/')({
   component: RouteComponent,
-
   loader: async ({ context }) => {
     await context.queryClient.ensureQueryData({
       queryKey: ['me'],
       queryFn: me,
     });
     await context.queryClient.ensureQueryData({
-      queryKey: ['get-cart'],
-      queryFn: getCart,
-    });
-    await context.queryClient.ensureQueryData({
       queryKey: ['shipping-province'],
       queryFn: getProvinces,
     });
+    const carts = await context.queryClient.ensureQueryData({
+      queryKey: ['get-cart'],
+      queryFn: getCart,
+    });
+    return carts;
   },
   pendingComponent: () => {
     return (
@@ -35,6 +35,8 @@ export const Route = createFileRoute('/cart/')({
 });
 
 function RouteComponent() {
+  const carts = Route.useLoaderData();
+
   return (
     <main className="w-full mx-auto px-4">
       <section
@@ -46,14 +48,18 @@ function RouteComponent() {
         <p className="text-foreground">Cart</p>
       </section>
       <section className="w-full">
-        <div className="flex lg:flex-row flex-col pt-6 gap-8">
-          <Carts />
-          <div className="w-full lg:max-w-md">
-            <OrderProvider>
-              <OrderSummary />
-            </OrderProvider>
+        {!carts ? (
+          <div className="text-2xl font-extrabold py-4">Your cart is empty</div>
+        ) : (
+          <div className="flex lg:flex-row flex-col pt-6 gap-8">
+            <Carts />
+            <div className="w-full lg:max-w-md">
+              <OrderProvider>
+                <OrderSummary />
+              </OrderProvider>
+            </div>
           </div>
-        </div>
+        )}
       </section>
       <div className="xl:mb-48 mb-16"></div>
     </main>

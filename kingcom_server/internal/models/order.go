@@ -25,18 +25,17 @@ type Order struct {
 	Status      OrderStatus `gorm:"column:status;type:varchar(20);default:'pending'" json:"status"`
 
 	// filled by user
-	UserID     uuid.UUID `gorm:"column:user_id;type:uuid;not null" json:"userId"`
-	Total      int64     `gorm:"column:total;not null" json:"total"`
-	ShippingID uint      `gorm:"column:shipping_id" json:"shippingId"`
+	UserID uuid.UUID `gorm:"column:user_id;type:uuid;not null" json:"userId"`
+	Total  int64     `gorm:"column:total;not null" json:"total"`
 
 	PaymentMethod  string `gorm:"column:payment_method;type:varchar(50)" json:"paymentMethod"`
 	BillingAddress string `gorm:"column:billing_address;type:text" json:"billingAddress"`
 
 	// Timestamps for order lifecycle
 	CreatedAt   time.Time `gorm:"column:created_at" json:"createdAt"`
-	PaidAt      time.Time `gorm:"column:paid_at" json:"paidAt"`
-	ShippedAt   time.Time `gorm:"column:shipped_at" json:"shippedAt"`
-	DeliveredAt time.Time `gorm:"column:delivered_at" json:"deliveredAt"`
+	PaidAt      time.Time `gorm:"column:paid_at;default:null" json:"paidAt"`
+	ShippedAt   time.Time `gorm:"column:shipped_at;default:null" json:"shippedAt"`
+	DeliveredAt time.Time `gorm:"column:delivered_at;default:null" json:"deliveredAt"`
 
 	// Relationships
 	User       User        `gorm:"foreignKey:UserID" json:"-"`
@@ -56,14 +55,15 @@ type OrderItem struct {
 }
 
 type Shipping struct {
-	ID          uint    `gorm:"primaryKey" json:"id"`
-	Name        string  `json:"name"`
-	Code        string  `json:"code"`
-	Service     string  `json:"service"`
-	Description string  `json:"description"`
-	Cost        float64 `json:"cost"`
-	Etd         string  `json:"etd"`
-	Address     string  `json:"address"`
+	ID          uint      `gorm:"primaryKey" json:"id"`
+	Name        string    `json:"name"`
+	Code        string    `json:"code"`
+	Service     string    `json:"service"`
+	Description string    `json:"description"`
+	Cost        float64   `json:"cost"`
+	Etd         string    `json:"etd"`
+	Address     string    `json:"address"`
+	OrderID     uuid.UUID `gorm:"not null;constraint:onDelete:CASCADE;" json:"order_id"`
 }
 
 func (u *Order) BeforeCreate(tx *gorm.DB) (err error) {

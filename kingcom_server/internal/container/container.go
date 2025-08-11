@@ -46,7 +46,7 @@ func NewContainer(db *gorm.DB, rdb *redis.Client, validate *validator.Validate, 
 	passwordService := services.NewPasswordService()
 	productService := services.NewProductService(productImagesRepo, productRepo, txManager, utilities)
 	cartService := services.NewCartService(cartRepo, txManager)
-	orderService := services.NewOrderService(orderRepo, txManager)
+	orderService := services.NewOrderService(orderRepo, cartRepo, productRepo, txManager)
 
 	// Controllers
 	userCtrl := user.NewUserController(userService)

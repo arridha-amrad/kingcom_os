@@ -14,18 +14,28 @@ type CreateOrderItemParams struct {
 }
 
 type CreateOrderParams struct {
-	UserID     uuid.UUID
-	ShippingID uint
-	Total      int64
+	UserID uuid.UUID
+	Total  int64
 }
 
 type CreateOrderRequest struct {
-	Total    int64                    `json:"total"`
-	Items    []CreateOrderRequestItem `json:"items"`
-	Shipping models.Shipping          `json:"shipping"`
+	Total    int64                      `json:"total"`
+	Items    []CreateOrderRequestItem   `json:"items"`
+	Shipping CreateOrderRequestShipping `json:"shipping"`
+}
+
+type CreateOrderRequestShipping struct {
+	Name        string  `json:"name"`
+	Code        string  `json:"code"`
+	Service     string  `json:"service"`
+	Description string  `json:"description"`
+	Cost        float64 `json:"cost"`
+	Etd         string  `json:"etd"`
+	Address     string  `json:"address"`
 }
 
 type CreateOrderRequestItem struct {
+	CartID    uuid.UUID `json:"cartId"`
 	ProductID uuid.UUID `json:"productId"`
 	Quantity  int       `json:"quantity"`
 }

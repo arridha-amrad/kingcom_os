@@ -25,9 +25,9 @@ export const useCreateOrder = () => {
         throw new Error('Something went wrong');
       }
     },
-    onSuccess(data) {
-      toast.success(data);
-      navigate({ to: '/' });
-    },
+    // onSuccess(data) {
+    //   toast.success(data);
+    //   navigate({ to: '/' });
+    // },
   });
 };

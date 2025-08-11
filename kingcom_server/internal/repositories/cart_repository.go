@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"errors"
 	"kingcom_server/internal/models"
 
 	"github.com/google/uuid"
@@ -20,12 +21,28 @@ type SaveOneParams struct {
 type ICartRepository interface {
 	SaveOne(tx *gorm.DB, params SaveOneParams) (*models.Cart, error)
 	GetMany(userId uuid.UUID) (*[]CartWithProduct, error)
+	RemoveManyCarts(
+		tx *gorm.DB,
+		CartID []uuid.UUID,
+	) error
 }
 
 func NewCartRepository(db *gorm.DB) ICartRepository {
 	return &cartRepository{
 		db: db,
 	}
+}
+
+func (r *cartRepository) RemoveManyCarts(
+	tx *gorm.DB,
+	CartID []uuid.UUID,
+) error {
+	if len(CartID) == 0 {
+		return errors.New("carts to delete cannot be empty")
+	}
+	err := tx.Where("id IN ?", CartID).Delete(&models.Cart{}).Error
+	return err
+
 }
 
 func (r *cartRepository) SaveOne(tx *gorm.DB, params SaveOneParams) (*models.Cart, error) {

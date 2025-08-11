@@ -1,19 +1,26 @@
 import { useOrder } from '@/components/Providers/OrderProvider';
+import type { Courier } from '@/hooks/useShipping';
 import { formatToIdr } from '@/utils';
 import { Radio, RadioGroup } from '@headlessui/react';
+import { useState } from 'react';
 
 interface Props {
   closeModal: VoidFunction;
 }
 
 const AvailableCouriers = ({ closeModal }: Props) => {
-  const { courier, setCourier, availableCouriers } = useOrder();
+  const [myCourier, setMyCourier] = useState<Courier | null>(null);
+  const { setCourier, availableCouriers } = useOrder();
+  const chooseCourier = () => {
+    closeModal();
+    setCourier(myCourier);
+  };
   return (
     <div className="mt-4">
       <div className="text-sm font-medium mb-2">Available services</div>
       <RadioGroup
-        value={courier}
-        onChange={setCourier}
+        value={myCourier}
+        onChange={setMyCourier}
         aria-label="Courier"
         className="space-y-2"
       >
@@ -34,9 +41,9 @@ const AvailableCouriers = ({ closeModal }: Props) => {
           </Radio>
         ))}
       </RadioGroup>
-      <div onClick={closeModal} className="my-4">
+      <div onClick={chooseCourier} className="my-4">
         <button className="bg-foreground disabled:brightness-75 text-background w-full rounded-2xl py-2 font-medium hover:bg-foreground/90 transition-colors ease-in duration-100">
-          Continue
+          Pick Courier
         </button>
       </div>
     </div>

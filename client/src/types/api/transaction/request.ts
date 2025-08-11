@@ -5,6 +5,7 @@ export interface PlaceOrderRequest {
 }
 
 export interface PlaceOrderItems {
+  cartId: string;
   productId: string;
   quantity: number;
 }

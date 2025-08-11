@@ -14,6 +14,7 @@ import {
   Plus,
   LogOut,
   ShieldUser,
+  BadgeDollarSign,
 } from 'lucide-react';
 import ModalLogout from '../Modals/ModalLogout';
 import { useState } from 'react';
@@ -67,9 +68,14 @@ export default function Example() {
             </MenuItem>
           )}
           <MenuItem>
-            <button className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-focus:bg-foreground/10">
-              <Pencil className="size-4" />
-              Edit Profile
+            <button
+              onClick={() => {
+                router({ to: '/transactions' });
+              }}
+              className="group flex w-full items-center gap-2 rounded-lg px-3 py-1.5 data-focus:bg-foreground/10"
+            >
+              <BadgeDollarSign className="size-4" />
+              Transactions
             </button>
           </MenuItem>
           <MenuItem>

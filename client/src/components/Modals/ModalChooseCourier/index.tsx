@@ -30,32 +30,88 @@ export default function ModalChooseCourier({}) {
     <>
       <button
         onClick={openModal}
-        className="bg-foreground text-background font-medium rounded-2xl px-4 py-2 flex items-center gap-2"
+        className="
+          flex
+          px-4 py-2
+          text-background font-medium
+          bg-foreground
+          rounded-2xl
+          items-center gap-2
+        "
       >
         Choose Courier
-        <Truck className="size-5" />
+        <Truck
+          className="
+            size-5
+          "
+        />
       </button>
-      <Dialog open={isOpen} onClose={() => {}} className="relative z-50">
+      <Dialog
+        open={isOpen}
+        onClose={() => {}}
+        className="
+          z-50
+          relative
+        "
+      >
         <DialogBackdrop
           transition
-          className="fixed inset-0 bg-background/70 backdrop-blur duration-300 ease-out data-closed:opacity-0"
+          className="
+            bg-background/70
+            fixed inset-0 backdrop-blur duration-300 ease-out data-closed:opacity-0
+          "
         />
-        <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
+        <div
+          className="
+            flex
+            w-screen
+            p-4
+            fixed inset-0 items-center justify-center
+          "
+        >
           <DialogPanel
             transition
-            className="max-w-sm w-full border border-foreground/20 relative z-50 shadow-2xl bg-background backdrop-blur-2xl rounded-2xl px-8 py-12 duration-300 ease-out data-closed:scale-95 data-closed:opacity-0"
+            className="
+              z-50
+              max-w-sm w-full
+              px-8 py-12
+              bg-background
+              border border-foreground/20 rounded-2xl
+              shadow-2xl
+              relative backdrop-blur-2xl duration-300 ease-out data-closed:scale-95 data-closed:opacity-0
+            "
           >
-            <div className="absolute inset-0 blur-3xl -z-50 bg-foreground/10" />
+            <div
+              className="
+                bg-foreground/10
+                absolute inset-0 blur-3xl -z-50
+              "
+            />
             <button
               onClick={closeModal}
-              className="absolute top-[4%] right-[5%]"
+              className="
+                absolute top-[4%] right-[5%]
+              "
             >
-              <X className="stroke-foreground/50 hover:stroke-foreground transition-colors ease-in duration-100" />
+              <X
+                className="
+                  transition-colors
+                  stroke-foreground/50 hover:stroke-foreground ease-in duration-100
+                "
+              />
             </button>
-            <DialogTitle className="font-bold text-4xl">
+            <DialogTitle
+              className="
+                font-bold text-4xl
+              "
+            >
               Choose Courier
             </DialogTitle>
-            <Description className="mt-2 mb-8">
+            <Description
+              className="
+                mt-2 mb-8
+              "
+            >
               Select your shipping address and courier service.
             </Description>
             {availableCouriers.length > 0 ? (

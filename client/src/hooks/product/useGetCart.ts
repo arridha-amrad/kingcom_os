@@ -60,7 +60,7 @@ export const decreaseQuantity = (qc: QueryClient, cartId: string) => {
 };
 
 export interface GetCartResponse {
-  cart: Cart[];
+  cart: Cart[] | null;
 }
 
 export interface Cart {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type CreateOneProductParams struct {
@@ -22,13 +23,31 @@ type productRepository struct {
 }
 
 type IProductRepository interface {
-	Save(tx *gorm.DB, params CreateOneProductParams) (*models.Product, error)
-	GetOne(params GetOneProductParams) (*models.Product, error)
+	Save(
+		tx *gorm.DB,
+		params CreateOneProductParams,
+	) (*models.Product, error)
+	GetOne(
+		params GetOneProductParams,
+	) (*models.Product, error)
 	GetMany() (*[]ProductWithAvgRating, error)
-	GetOneBySlug(slug string) (*ProductWithAvgRating, error)
+	GetOneBySlug(
+		slug string,
+	) (*ProductWithAvgRating, error)
+	UpdateStock(
+		tx *gorm.DB,
+		productId uuid.UUID,
+		value uint,
+	) error
+	GetProductsForUpdate(
+		tx *gorm.DB,
+		productIDs []uuid.UUID,
+	) ([]models.Product, error)
 }
 
-func NewProductRepository(db *gorm.DB) IProductRepository {
+func NewProductRepository(
+	db *gorm.DB,
+) IProductRepository {
 	return &productRepository{
 		db: db,
 	}
@@ -39,7 +58,38 @@ type GetOneProductParams struct {
 	Slug *string
 }
 
-func (r *productRepository) GetOne(params GetOneProductParams) (*models.Product, error) {
+func (r *productRepository) GetProductsForUpdate(
+	tx *gorm.DB,
+	productIDs []uuid.UUID,
+) ([]models.Product, error) {
+	var products []models.Product
+	if len(productIDs) == 0 {
+		return products, nil
+	}
+
+	err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
+		Where("id IN ?", productIDs).
+		Find(&products).Error
+
+	return products, err
+}
+
+func (r productRepository) UpdateStock(
+	tx *gorm.DB,
+	productId uuid.UUID,
+	value uint,
+) error {
+	if err := tx.Model(&models.Product{}).
+		Where("id = ?", productId).
+		Update("stock", value).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *productRepository) GetOne(
+	params GetOneProductParams,
+) (*models.Product, error) {
 	var product models.Product
 	whereClause := models.Product{}
 	if params.ID != nil {
@@ -48,13 +98,17 @@ func (r *productRepository) GetOne(params GetOneProductParams) (*models.Product,
 	if params.Slug != nil {
 		whereClause.Slug = *params.Slug
 	}
-	if err := r.db.Where(&whereClause).First(&product).Error; err != nil {
+	if err := r.db.Where(&whereClause).
+		First(&product).Error; err != nil {
 		return nil, err
 	}
 	return &product, nil
 }
 
-func (r *productRepository) Save(tx *gorm.DB, params CreateOneProductParams) (*models.Product, error) {
+func (r *productRepository) Save(
+	tx *gorm.DB,
+	params CreateOneProductParams,
+) (*models.Product, error) {
 	product := models.Product{
 		Name:          params.Name,
 		Price:         params.Price,

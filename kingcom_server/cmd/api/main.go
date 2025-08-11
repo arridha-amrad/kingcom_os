@@ -42,6 +42,9 @@ func main() {
 		&models.ProductReview{},
 		&models.ProductRating{},
 		&models.Cart{},
+		&models.Order{},
+		&models.Shipping{},
+		&models.OrderItem{},
 	)
 
 	sqlDB, err := db.DB()

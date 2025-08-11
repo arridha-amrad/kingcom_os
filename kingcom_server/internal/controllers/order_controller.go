@@ -28,20 +28,7 @@ func NewOrderController(
 	}
 }
 
-func (ctrl *orderController) GetMany(ctx *gin.Context) {}
-
-func (ctrl *orderController) Create(c *gin.Context) {
-	value, exist := c.Get(constants.VALIDATED_BODY)
-	if !exist {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "validated body not exists"})
-		return
-	}
-	body, ok := value.(dto.CreateOrderRequest)
-	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid type for validated body"})
-		return
-	}
-
+func (ctrl *orderController) GetMany(c *gin.Context) {
 	accTokenPayload, exist := c.Get(constants.ACCESS_TOKEN_PAYLOAD)
 	if !exist {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "validated body not exists"})
@@ -57,18 +44,54 @@ func (ctrl *orderController) Create(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to parse to uuid"})
 		return
 	}
-	log.Println(userId)
-	log.Printf("%+v", body)
-	// if err := ctrl.orderService.PlaceOrder(
-	// 	c.Request.Context(),
-	// 	userId,
-	// 	body.Total,
-	// 	body.Shipping,
-	// 	body.Items,
-	// ); err != nil {
-	// 	c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	orders, err := ctrl.orderService.GetOrders(userId)
+	if err != nil {
+		log.Println(err.Error())
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get orders"})
+		return
+	}
+	c.JSON(
+		http.StatusOK,
+		gin.H{"orders": orders},
+	)
+}
+
+func (ctrl *orderController) Create(c *gin.Context) {
+	value, exist := c.Get(constants.VALIDATED_BODY)
+	if !exist {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "validated body not exists"})
+		return
+	}
+	body, ok := value.(dto.CreateOrderRequest)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid type for validated body"})
+		return
+	}
+	accTokenPayload, exist := c.Get(constants.ACCESS_TOKEN_PAYLOAD)
+	if !exist {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "validated body not exists"})
+		return
+	}
+	tokenPayload, ok := accTokenPayload.(services.JWTPayload)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid token payload"})
+		return
+	}
+	userId, err := uuid.Parse(tokenPayload.UserId)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to parse to uuid"})
+		return
+	}
+	if err := ctrl.orderService.PlaceOrder(
+		c.Request.Context(),
+		userId,
+		body.Total,
+		body.Shipping,
+		body.Items,
+	); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Order placed successfully",
 	})

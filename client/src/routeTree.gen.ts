@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TransactionsIndexRouteImport } from './routes/transactions/index'
 import { Route as ProductsIndexRouteImport } from './routes/products/index'
 import { Route as DummyIndexRouteImport } from './routes/dummy/index'
 import { Route as CartIndexRouteImport } from './routes/cart/index'
@@ -22,6 +23,11 @@ import { Route as DummyDemoFormAddressRouteImport } from './routes/dummy/demo.fo
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TransactionsIndexRoute = TransactionsIndexRouteImport.update({
+  id: '/transactions/',
+  path: '/transactions/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ProductsIndexRoute = ProductsIndexRouteImport.update({
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartIndexRoute
   '/dummy': typeof DummyIndexRoute
   '/products': typeof ProductsIndexRoute
+  '/transactions': typeof TransactionsIndexRoute
   '/dummy/demo/tanstack-query': typeof DummyDemoTanstackQueryRoute
   '/dummy/demo/form/address': typeof DummyDemoFormAddressRoute
   '/dummy/demo/form/simple': typeof DummyDemoFormSimpleRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/cart': typeof CartIndexRoute
   '/dummy': typeof DummyIndexRoute
   '/products': typeof ProductsIndexRoute
+  '/transactions': typeof TransactionsIndexRoute
   '/dummy/demo/tanstack-query': typeof DummyDemoTanstackQueryRoute
   '/dummy/demo/form/address': typeof DummyDemoFormAddressRoute
   '/dummy/demo/form/simple': typeof DummyDemoFormSimpleRoute
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/cart/': typeof CartIndexRoute
   '/dummy/': typeof DummyIndexRoute
   '/products/': typeof ProductsIndexRoute
+  '/transactions/': typeof TransactionsIndexRoute
   '/dummy/demo/tanstack-query': typeof DummyDemoTanstackQueryRoute
   '/dummy/demo/form/address': typeof DummyDemoFormAddressRoute
   '/dummy/demo/form/simple': typeof DummyDemoFormSimpleRoute
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/dummy'
     | '/products'
+    | '/transactions'
     | '/dummy/demo/tanstack-query'
     | '/dummy/demo/form/address'
     | '/dummy/demo/form/simple'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/dummy'
     | '/products'
+    | '/transactions'
     | '/dummy/demo/tanstack-query'
     | '/dummy/demo/form/address'
     | '/dummy/demo/form/simple'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/cart/'
     | '/dummy/'
     | '/products/'
+    | '/transactions/'
     | '/dummy/demo/tanstack-query'
     | '/dummy/demo/form/address'
     | '/dummy/demo/form/simple'
@@ -142,6 +154,7 @@ export interface RootRouteChildren {
   CartIndexRoute: typeof CartIndexRoute
   DummyIndexRoute: typeof DummyIndexRoute
   ProductsIndexRoute: typeof ProductsIndexRoute
+  TransactionsIndexRoute: typeof TransactionsIndexRoute
   DummyDemoTanstackQueryRoute: typeof DummyDemoTanstackQueryRoute
   DummyDemoFormAddressRoute: typeof DummyDemoFormAddressRoute
   DummyDemoFormSimpleRoute: typeof DummyDemoFormSimpleRoute
@@ -154,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/transactions/': {
+      id: '/transactions/'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof TransactionsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/products/': {
@@ -222,6 +242,7 @@ const rootRouteChildren: RootRouteChildren = {
   CartIndexRoute: CartIndexRoute,
   DummyIndexRoute: DummyIndexRoute,
   ProductsIndexRoute: ProductsIndexRoute,
+  TransactionsIndexRoute: TransactionsIndexRoute,
   DummyDemoTanstackQueryRoute: DummyDemoTanstackQueryRoute,
   DummyDemoFormAddressRoute: DummyDemoFormAddressRoute,
   DummyDemoFormSimpleRoute: DummyDemoFormSimpleRoute,

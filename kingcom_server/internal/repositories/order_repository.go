@@ -13,15 +13,46 @@ type orderRepository struct {
 }
 
 type IOrderRepository interface {
-	CreateOrderShipping(tx *gorm.DB, params models.Shipping) (*models.Shipping, error)
-	CreateOrder(tx *gorm.DB, params dto.CreateOrderParams) (*models.Order, error)
-	CreateOrderItems(tx *gorm.DB, orderId uuid.UUID, items []dto.CreateOrderItemParams) (*[]models.OrderItem, error)
+	CreateOrderShipping(
+		tx *gorm.DB,
+		params dto.CreateOrderRequestShipping,
+		orderId uuid.UUID,
+	) (*models.Shipping, error)
+	CreateOrder(
+		tx *gorm.DB,
+		params dto.CreateOrderParams,
+	) (*models.Order, error)
+	CreateOrderItems(tx *gorm.DB,
+		orderId uuid.UUID,
+		items []dto.CreateOrderItemParams,
+	) error
+	GetOrders(
+		userId uuid.UUID,
+	) (*[]models.Order, error)
 }
 
-func NewOrderRepository(db *gorm.DB) IOrderRepository {
+func NewOrderRepository(
+	db *gorm.DB,
+) IOrderRepository {
 	return &orderRepository{
 		db: db,
 	}
+}
+
+func (r *orderRepository) GetOrders(
+	userId uuid.UUID,
+) (*[]models.Order, error) {
+	var orders []models.Order
+	if err := r.db.
+		Where("user_id = ?", userId).
+		Preload("User").
+		Preload("OrderItems").
+		Preload("OrderItems.Product").
+		Preload("Shipping").
+		Find(&orders).Error; err != nil {
+		return nil, err
+	}
+	return &orders, nil
 }
 
 // func (r *orderRepository) GetOrders() (*[]dto.GetOrders, error) {
@@ -95,11 +126,13 @@ func NewOrderRepository(db *gorm.DB) IOrderRepository {
 
 // }
 
-func (r *orderRepository) CreateOrder(tx *gorm.DB, params dto.CreateOrderParams) (*models.Order, error) {
+func (r *orderRepository) CreateOrder(
+	tx *gorm.DB,
+	params dto.CreateOrderParams,
+) (*models.Order, error) {
 	newOrder := models.Order{
-		ShippingID: params.ShippingID,
-		UserID:     params.UserID,
-		Total:      params.Total,
+		UserID: params.UserID,
+		Total:  params.Total,
 	}
 	if err := tx.Create(&newOrder).Error; err != nil {
 		return nil, err
@@ -107,7 +140,11 @@ func (r *orderRepository) CreateOrder(tx *gorm.DB, params dto.CreateOrderParams)
 	return &newOrder, nil
 }
 
-func (r *orderRepository) CreateOrderItems(tx *gorm.DB, orderId uuid.UUID, items []dto.CreateOrderItemParams) (*[]models.OrderItem, error) {
+func (r *orderRepository) CreateOrderItems(
+	tx *gorm.DB,
+	orderId uuid.UUID,
+	items []dto.CreateOrderItemParams,
+) error {
 	var orderItems []models.OrderItem
 	for _, item := range items {
 		orderItem := models.OrderItem{
@@ -118,15 +155,28 @@ func (r *orderRepository) CreateOrderItems(tx *gorm.DB, orderId uuid.UUID, items
 		orderItems = append(orderItems, orderItem)
 	}
 	if err := tx.Create(&orderItems).Error; err != nil {
-		return nil, err
+		return err
 	}
-	return &orderItems, nil
+	return nil
 }
 
-func (r *orderRepository) CreateOrderShipping(tx *gorm.DB, params models.Shipping) (*models.Shipping, error) {
-	if err := tx.Create(&params).Error; err != nil {
+func (r *orderRepository) CreateOrderShipping(
+	tx *gorm.DB,
+	params dto.CreateOrderRequestShipping,
+	orderId uuid.UUID,
+) (*models.Shipping, error) {
+	var newData = models.Shipping{
+		Name:        params.Name,
+		Code:        params.Code,
+		Service:     params.Service,
+		Description: params.Description,
+		Cost:        params.Cost,
+		Etd:         params.Etd,
+		Address:     params.Address,
+		OrderID:     orderId,
+	}
+	if err := tx.Create(&newData).Error; err != nil {
 		return nil, err
 	}
-	return &params, nil
-
+	return &newData, nil
 }
