@@ -33,7 +33,7 @@ type ProductImage struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"deleted_at"`
 
 	Url       string    `json:"url"`
-	ProductID uuid.UUID `json:"product_id"`
+	ProductID uuid.UUID `json:"-"`
 	Product   Product   `gorm:"foreignKey:ProductID" json:"-"`
 }
 

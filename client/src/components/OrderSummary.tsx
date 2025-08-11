@@ -93,7 +93,7 @@ function OrderSummary() {
         onClick={placeMyOrder}
         className="h-15 rounded-full w-full disabled:cursor-default flex items-center justify-center gap-4 bg-foreground font-medium text-background disabled:brightness-75"
       >
-        <span className="font-medium">Go to Checkout</span>
+        <span className="font-medium">Place Order</span>
         <ArrowRightIcon />
       </button>
     </div>

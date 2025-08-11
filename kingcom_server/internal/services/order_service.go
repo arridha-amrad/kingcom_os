@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"kingcom_server/internal/dto"
-	"kingcom_server/internal/models"
 	"kingcom_server/internal/repositories"
 	"kingcom_server/internal/transaction"
 
@@ -29,7 +28,7 @@ type IOrderService interface {
 	) error
 	GetOrders(
 		userId uuid.UUID,
-	) (*[]models.Order, error)
+	) ([]repositories.MapperOrder, error)
 }
 
 func NewOrderService(
@@ -60,18 +59,21 @@ func (s *orderService) PlaceOrder(
 	items []dto.CreateOrderRequestItem,
 ) error {
 	err := s.txManager.Do(ctx, func(tx *gorm.DB) error {
-		order, err := s.orderRepository.CreateOrder(
+		newShipping, err := s.orderRepository.CreateOrderShipping(tx, shipping)
+		if err != nil {
+			return err
+		}
+		newOrder, err := s.orderRepository.CreateOrder(
 			tx,
 			dto.CreateOrderParams{
-				UserID: userId,
-				Total:  total,
+				UserID:     userId,
+				Total:      total,
+				ShippingID: newShipping.ID,
 			})
 		if err != nil {
 			return err
 		}
-		if _, err := s.orderRepository.CreateOrderShipping(tx, shipping, order.ID); err != nil {
-			return err
-		}
+
 		// Preallocate slices
 		orderItems := make([]dto.CreateOrderItemParams, 0, len(items))
 		cartsToDeleteIds := make([]uuid.UUID, 0, len(items))
@@ -81,7 +83,7 @@ func (s *orderService) PlaceOrder(
 			orderItems = append(orderItems, dto.CreateOrderItemParams{
 				ProductID: item.ProductID,
 				Quantity:  item.Quantity,
-				OrderID:   order.ID,
+				OrderID:   newOrder.ID,
 			})
 			cartsToDeleteIds = append(cartsToDeleteIds, item.CartID)
 			productIDs = append(productIDs, item.ProductID)
@@ -103,7 +105,7 @@ func (s *orderService) PlaceOrder(
 				return err
 			}
 		}
-		if err := s.orderRepository.CreateOrderItems(tx, order.ID, orderItems); err != nil {
+		if err := s.orderRepository.CreateOrderItems(tx, newOrder.ID, orderItems); err != nil {
 			return err
 		}
 		if err := s.cartRepository.RemoveManyCarts(tx, cartsToDeleteIds); err != nil {
@@ -116,7 +118,7 @@ func (s *orderService) PlaceOrder(
 
 func (s *orderService) GetOrders(
 	userId uuid.UUID,
-) (*[]models.Order, error) {
+) ([]repositories.MapperOrder, error) {
 	orders, err := s.orderRepository.GetOrders(userId)
 	if err != nil {
 		return nil, err

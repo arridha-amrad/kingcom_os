@@ -25,45 +25,46 @@ type Order struct {
 	Status      OrderStatus `gorm:"column:status;type:varchar(20);default:'pending'" json:"status"`
 
 	// filled by user
-	UserID uuid.UUID `gorm:"column:user_id;type:uuid;not null" json:"userId"`
-	Total  int64     `gorm:"column:total;not null" json:"total"`
+	UserID     uuid.UUID `gorm:"column:user_id;type:uuid;not null" json:"-"`
+	Total      int64     `gorm:"column:total;not null" json:"total"`
+	ShippingID uint      `gorm:"column:shipping_id;not null" json:"-"`
 
 	PaymentMethod  string `gorm:"column:payment_method;type:varchar(50)" json:"paymentMethod"`
 	BillingAddress string `gorm:"column:billing_address;type:text" json:"billingAddress"`
 
 	// Timestamps for order lifecycle
-	CreatedAt   time.Time `gorm:"column:created_at" json:"createdAt"`
-	PaidAt      time.Time `gorm:"column:paid_at;default:null" json:"paidAt"`
-	ShippedAt   time.Time `gorm:"column:shipped_at;default:null" json:"shippedAt"`
-	DeliveredAt time.Time `gorm:"column:delivered_at;default:null" json:"deliveredAt"`
+	CreatedAt   time.Time  `gorm:"column:created_at" json:"createdAt"`
+	PaidAt      *time.Time `gorm:"column:paid_at" json:"paidAt"`
+	ShippedAt   *time.Time `gorm:"column:shipped_at" json:"shippedAt"`
+	DeliveredAt *time.Time `gorm:"column:delivered_at" json:"deliveredAt"`
 
 	// Relationships
 	User       User        `gorm:"foreignKey:UserID" json:"-"`
-	OrderItems []OrderItem `gorm:"foreignKey:OrderID;constraint:onDelete:CASCADE;" json:"order_items"`
-	Shipping   Shipping    `gorm:"foreignKey:OrderID;constraint:onDelete:CASCADE;" json:"shipping"`
+	Shipping   Shipping    `gorm:"foreignKey:ShippingID;constraint:onDelete:CASCADE" json:"shipping"`
+	OrderItems []OrderItem `gorm:"foreignKey:OrderID;constraint:onDelete:CASCADE;" json:"orderItems"`
 }
 
 type OrderItem struct {
-	gorm.Model
-	OrderID   uuid.UUID `gorm:"not null;constraint:onDelete:CASCADE;" json:"order_id"`
-	ProductID uuid.UUID `gorm:"not null" json:"product_id"`
+	ID        uint      `gorm:"primaryKey" json:"id"`
+	CreatedAt time.Time `json:"-"`
+	OrderID   uuid.UUID `gorm:"not null;constraint:onDelete:CASCADE;" json:"-"`
+	ProductID uuid.UUID `gorm:"not null" json:"-"`
 	Quantity  int       `gorm:"not null" json:"quantity"`
 
 	// Relationships
 	Product Product `gorm:"foreignKey:ProductID" json:"product"`
-	Order   Order   `gorm:"foreignKey:OrderID" json:"order"`
+	Order   Order   `gorm:"foreignKey:OrderID" json:"-"`
 }
 
 type Shipping struct {
-	ID          uint      `gorm:"primaryKey" json:"id"`
-	Name        string    `json:"name"`
-	Code        string    `json:"code"`
-	Service     string    `json:"service"`
-	Description string    `json:"description"`
-	Cost        float64   `json:"cost"`
-	Etd         string    `json:"etd"`
-	Address     string    `json:"address"`
-	OrderID     uuid.UUID `gorm:"not null;constraint:onDelete:CASCADE;" json:"order_id"`
+	ID          uint    `gorm:"primaryKey" json:"id"`
+	Name        string  `json:"name"`
+	Code        string  `json:"code"`
+	Service     string  `json:"service"`
+	Description string  `json:"description"`
+	Cost        float64 `json:"cost"`
+	Etd         string  `json:"etd"`
+	Address     string  `json:"address"`
 }
 
 func (u *Order) BeforeCreate(tx *gorm.DB) (err error) {

@@ -14,30 +14,9 @@ type CreateOrderItemParams struct {
 }
 
 type CreateOrderParams struct {
-	UserID uuid.UUID
-	Total  int64
-}
-
-type CreateOrderRequest struct {
-	Total    int64                      `json:"total"`
-	Items    []CreateOrderRequestItem   `json:"items"`
-	Shipping CreateOrderRequestShipping `json:"shipping"`
-}
-
-type CreateOrderRequestShipping struct {
-	Name        string  `json:"name"`
-	Code        string  `json:"code"`
-	Service     string  `json:"service"`
-	Description string  `json:"description"`
-	Cost        float64 `json:"cost"`
-	Etd         string  `json:"etd"`
-	Address     string  `json:"address"`
-}
-
-type CreateOrderRequestItem struct {
-	CartID    uuid.UUID `json:"cartId"`
-	ProductID uuid.UUID `json:"productId"`
-	Quantity  int       `json:"quantity"`
+	UserID     uuid.UUID
+	Total      int64
+	ShippingID uint
 }
 
 type GetOrders struct {
@@ -84,4 +63,27 @@ type OrderWithItemFlat struct {
 	ProductImage      string    `json:"product_image"`
 	ProductWeight     float64   `json:"product_weight"`
 	ProductDiscount   int       `json:"product_discount"`
+}
+
+// Used in API Request
+type CreateOrderRequest struct {
+	Total    int64                      `json:"total"`
+	Items    []CreateOrderRequestItem   `json:"items"`
+	Shipping CreateOrderRequestShipping `json:"shipping"`
+}
+
+type CreateOrderRequestShipping struct {
+	Name        string  `json:"name"`
+	Code        string  `json:"code"`
+	Service     string  `json:"service"`
+	Description string  `json:"description"`
+	Cost        float64 `json:"cost"`
+	Etd         string  `json:"etd"`
+	Address     string  `json:"address"`
+}
+
+type CreateOrderRequestItem struct {
+	CartID    uuid.UUID `json:"cartId"`
+	ProductID uuid.UUID `json:"productId"`
+	Quantity  int       `json:"quantity"`
 }

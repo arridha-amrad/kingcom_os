@@ -1,16 +1,16 @@
 export interface SignupRequest {
-  name: string
-  email: string
-  username: string
-  password: string
+  name: string;
+  email: string;
+  username: string;
+  password: string;
 }
 
 export interface LoginRequest {
-  identity: string
-  password: string
+  identity: string;
+  password: string;
 }
 
 export interface VerifyRequest {
-  code: string
-  token: string
+  code: string;
+  token: string;
 }
