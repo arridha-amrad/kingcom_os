@@ -15,3 +15,12 @@ export const formatToIdr = (finalPrice: number) => {
   }).format(finalPrice);
   return formatted;
 };
+
+export const transactionDateFormatter = (date: Date) => {
+  const formattedDate = new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  }).format(date);
+  return formattedDate;
+};

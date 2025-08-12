@@ -20,7 +20,7 @@ export interface PlaceOrderShipping {
   address: string;
 }
 
-export interface OrdersResponse {
+export interface GetTransactionsResponse {
   orders: Order[];
 }
 

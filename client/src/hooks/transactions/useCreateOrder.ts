@@ -1,12 +1,12 @@
 import { privateAxios } from '@/lib/axiosInterceptor';
 import type { PlaceOrderRequest } from '@/types/api/transaction';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { AxiosError } from 'axios';
-import toast from 'react-hot-toast';
 
 export const useCreateOrder = () => {
   const navigate = useNavigate();
+  const qc = useQueryClient();
   return useMutation({
     mutationKey: ['create-order'],
     mutationFn: async ({ items, shipping, total }: PlaceOrderRequest) => {
@@ -25,9 +25,9 @@ export const useCreateOrder = () => {
         throw new Error('Something went wrong');
       }
     },
-    // onSuccess(data) {
-    //   toast.success(data);
-    //   navigate({ to: '/' });
-    // },
+    onSuccess() {
+      qc.invalidateQueries({ queryKey: ['get-transactions'] });
+      navigate({ to: '/transactions' });
+    },
   });
 };

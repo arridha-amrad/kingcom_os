@@ -1,3 +1,4 @@
+import TransactionList from '@/components/TransactionList';
 import { me } from '@/hooks/auth/useGetAuth';
 import {
   getMyTransactions,
@@ -36,6 +37,7 @@ function RouteComponent() {
         <p className="text-foreground">Transactions</p>
       </section>
       <div className="text-2xl font-bold">Transaction List</div>
+      <TransactionList />
     </main>
   );
 }
