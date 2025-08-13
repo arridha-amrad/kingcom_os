@@ -23,10 +23,10 @@ type CreateOneParams struct {
 }
 
 type IUserRepository interface {
-	GetAll(tx *gorm.DB) ([]models.User, error)
+	GetAll() ([]models.User, error)
 	CreateOne(tx *gorm.DB, params CreateOneParams) (*models.User, error)
 	UpdateOne(tx *gorm.DB, userId uuid.UUID, data UpdateParams) (*models.User, error)
-	GetOne(tx *gorm.DB, params GetOneParams) (*models.User, error)
+	GetOne(params GetOneParams) (*models.User, error)
 }
 
 type userRepository struct {
@@ -37,10 +37,7 @@ func NewUserRepository(db *gorm.DB) IUserRepository {
 	return &userRepository{db: db}
 }
 
-func (s *userRepository) GetOne(tx *gorm.DB, params GetOneParams) (*models.User, error) {
-	if tx == nil {
-		tx = s.db
-	}
+func (r *userRepository) GetOne(params GetOneParams) (*models.User, error) {
 	var user models.User
 	whereClause := models.User{}
 	if params.Id != nil {
@@ -52,18 +49,15 @@ func (s *userRepository) GetOne(tx *gorm.DB, params GetOneParams) (*models.User,
 	if params.Username != nil {
 		whereClause.Username = *params.Username
 	}
-	if err := tx.Where(&whereClause).First(&user).Error; err != nil {
+	if err := r.db.Where(&whereClause).First(&user).Error; err != nil {
 		return nil, err
 	}
 	return &user, nil
 }
 
-func (s *userRepository) GetAll(tx *gorm.DB) ([]models.User, error) {
-	if tx == nil {
-		tx = s.db
-	}
+func (r *userRepository) GetAll() ([]models.User, error) {
 	var users []models.User
-	if err := tx.Find(&users).Error; err != nil {
+	if err := r.db.Find(&users).Error; err != nil {
 		return nil, err
 	}
 	return users, nil

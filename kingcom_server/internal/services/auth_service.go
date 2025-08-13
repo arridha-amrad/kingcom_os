@@ -26,14 +26,35 @@ type authService struct {
 }
 
 type IAuthService interface {
-	CreateAuthTokens(params CreateAuthTokenParams) (CreateAuthTokensResult, error)
-	CreateVerificationToken(userId uuid.UUID) (VerificationTokenData, error)
-	VerifyVerificationToken(params VerificationTokenData) (string, error)
+	CreateAuthTokens(
+		params CreateAuthTokenParams,
+	) (CreateAuthTokensResult, error)
+	CreateVerificationToken(
+		userId uuid.UUID,
+	) (VerificationTokenData, error)
+	VerifyVerificationToken(
+		params VerificationTokenData,
+	) (string, error)
 	GeneratePairToken() (TokenPair, error)
-	SaveRegistrationData(ctx context.Context, params repositories.CreateOneParams) (*models.User, error)
-	UpdateUserPassword(ctx context.Context, userId uuid.UUID, newPassword string) error
-	VerifyNewAccount(ctx context.Context, userId uuid.UUID) error
-	GetRefreshTokenFromRequest(c *gin.Context) (string, error)
+	SaveRegistrationData(
+		ctx context.Context,
+		params repositories.CreateOneParams,
+	) (*models.User, error)
+	UpdateUserPassword(
+		ctx context.Context,
+		userId uuid.UUID,
+		newPassword string,
+	) error
+	VerifyNewAccount(
+		ctx context.Context,
+		userId uuid.UUID,
+	) error
+	GetRefreshTokenFromRequest(
+		c *gin.Context,
+	) (string, error)
+	GetAccessTokenPayload(
+		c *gin.Context,
+	) (AccessTokenPayload, error)
 }
 
 func NewAuthService(
@@ -52,7 +73,35 @@ func NewAuthService(
 	}
 }
 
-func (s *authService) GetRefreshTokenFromRequest(c *gin.Context) (string, error) {
+func (s *authService) GetAccessTokenPayload(
+	c *gin.Context,
+) (AccessTokenPayload, error) {
+	accTokenPayload, exist := c.Get(constants.ACCESS_TOKEN_PAYLOAD)
+	if !exist {
+		return AccessTokenPayload{}, errors.New("validated body not exists")
+	}
+	tokenPayload, ok := accTokenPayload.(JWTPayload)
+	if !ok {
+		return AccessTokenPayload{}, errors.New("invalid token payload")
+	}
+	userId, err := uuid.Parse(tokenPayload.UserId)
+	if err != nil {
+		return AccessTokenPayload{}, errors.New("failed to parse to uuid")
+	}
+	jti, err := uuid.Parse(tokenPayload.Jti)
+	if err != nil {
+		return AccessTokenPayload{}, errors.New("failed to parse to uuid")
+	}
+	return AccessTokenPayload{
+		UserId:     userId,
+		Jti:        jti,
+		JwtVersion: tokenPayload.JwtVersion,
+	}, nil
+}
+
+func (s *authService) GetRefreshTokenFromRequest(
+	c *gin.Context,
+) (string, error) {
 	rawRefreshToken, err := c.Cookie(constants.COOKIE_REFRESH_TOKEN)
 	// if refresh token not exists in cookie
 	if err != nil {
@@ -66,7 +115,10 @@ func (s *authService) GetRefreshTokenFromRequest(c *gin.Context) (string, error)
 	return rawRefreshToken, nil
 }
 
-func (s *authService) VerifyNewAccount(ctx context.Context, userId uuid.UUID) error {
+func (s *authService) VerifyNewAccount(
+	ctx context.Context,
+	userId uuid.UUID,
+) error {
 	err := s.txManager.Do(ctx, func(tx *gorm.DB) error {
 		if _, err := s.userRepo.UpdateOne(tx, userId, repositories.UpdateParams{
 			IsVerified: true,
@@ -78,7 +130,11 @@ func (s *authService) VerifyNewAccount(ctx context.Context, userId uuid.UUID) er
 	return err
 }
 
-func (s *authService) UpdateUserPassword(ctx context.Context, userId uuid.UUID, newPassword string) error {
+func (s *authService) UpdateUserPassword(
+	ctx context.Context,
+	userId uuid.UUID,
+	newPassword string,
+) error {
 	randomBytes, err := s.utils.GenerateRandomBytes(constants.JWT_VERSION_LENGTH)
 	if err != nil {
 		return err
@@ -97,10 +153,14 @@ func (s *authService) UpdateUserPassword(ctx context.Context, userId uuid.UUID, 
 	return nil
 }
 
-func (s *authService) SaveRegistrationData(ctx context.Context, params repositories.CreateOneParams) (*models.User, error) {
-	user, err := s.userRepo.GetOne(nil, repositories.GetOneParams{
-		Username: &params.Username,
-	})
+func (s *authService) SaveRegistrationData(
+	ctx context.Context,
+	params repositories.CreateOneParams,
+) (*models.User, error) {
+	user, err := s.userRepo.GetOne(
+		repositories.GetOneParams{
+			Username: &params.Username,
+		})
 	if err != nil {
 		if !strings.Contains(err.Error(), "not found") {
 			return nil, err
@@ -109,9 +169,10 @@ func (s *authService) SaveRegistrationData(ctx context.Context, params repositor
 	if user != nil {
 		return nil, errors.New("username has been registered")
 	}
-	user, err = s.userRepo.GetOne(nil, repositories.GetOneParams{
-		Email: &params.Email,
-	})
+	user, err = s.userRepo.GetOne(
+		repositories.GetOneParams{
+			Email: &params.Email,
+		})
 	if err != nil {
 		if !strings.Contains(err.Error(), "not found") {
 			return nil, err
@@ -135,7 +196,9 @@ func (s *authService) SaveRegistrationData(ctx context.Context, params repositor
 	return newUser, nil
 }
 
-func (s *authService) CreateAuthTokens(params CreateAuthTokenParams) (CreateAuthTokensResult, error) {
+func (s *authService) CreateAuthTokens(
+	params CreateAuthTokenParams,
+) (CreateAuthTokensResult, error) {
 	// delete old refresh token record from redis (refresh token behavior)
 	if params.OldRefToken != nil {
 		if err := s.redisService.DeleteRefreshToken(s.utils.HashWithSHA256(*params.OldRefToken)); err != nil {
@@ -186,7 +249,9 @@ func (s *authService) CreateAuthTokens(params CreateAuthTokenParams) (CreateAuth
 
 }
 
-func (s *authService) CreateVerificationToken(userId uuid.UUID) (VerificationTokenData, error) {
+func (s *authService) CreateVerificationToken(
+	userId uuid.UUID,
+) (VerificationTokenData, error) {
 	tokenPair, err := s.GeneratePairToken()
 	if err != nil {
 		return VerificationTokenData{}, err
@@ -208,8 +273,12 @@ func (s *authService) CreateVerificationToken(userId uuid.UUID) (VerificationTok
 	}, nil
 }
 
-func (s *authService) VerifyVerificationToken(params VerificationTokenData) (string, error) {
-	data, err := s.redisService.GetVerificationToken(s.utils.HashWithSHA256(params.RawToken))
+func (s *authService) VerifyVerificationToken(
+	params VerificationTokenData,
+) (string, error) {
+	data, err := s.redisService.GetVerificationToken(
+		s.utils.HashWithSHA256(params.RawToken),
+	)
 	if err != nil {
 		return "", err
 	}
@@ -253,4 +322,10 @@ type VerificationTokenData struct {
 type TokenPair struct {
 	Hashed string
 	Raw    string
+}
+
+type AccessTokenPayload struct {
+	UserId     uuid.UUID
+	Jti        uuid.UUID
+	JwtVersion string
 }

@@ -20,12 +20,12 @@ export const Route = createFileRoute('/transactions/')({
     });
     return t;
   },
+  onError(err) {
+    console.log('transaction route error : ', err);
+  },
 });
 
 function RouteComponent() {
-  const t = Route.useLoaderData();
-  console.log({ t });
-
   return (
     <main className="px-4">
       <section

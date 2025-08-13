@@ -26,7 +26,7 @@ func NewUserService(userRepo repositories.IUserRepository) IUserService {
 }
 
 func (s *userService) GetUserById(ctx context.Context, userId uuid.UUID) (*models.User, error) {
-	user, err := s.userRepo.GetOne(nil, repositories.GetOneParams{Id: &userId})
+	user, err := s.userRepo.GetOne(repositories.GetOneParams{Id: &userId})
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +42,7 @@ func (s *userService) GetUserByIdentity(ctx context.Context, identity string) (*
 }
 
 func (s *userService) GetUserByEmail(ctx context.Context, email string) (*models.User, error) {
-	user, err := s.userRepo.GetOne(nil, repositories.GetOneParams{
+	user, err := s.userRepo.GetOne(repositories.GetOneParams{
 		Email: &email,
 	})
 	if err != nil {
@@ -52,7 +52,7 @@ func (s *userService) GetUserByEmail(ctx context.Context, email string) (*models
 }
 
 func (s *userService) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
-	user, err := s.userRepo.GetOne(nil, repositories.GetOneParams{Username: &username})
+	user, err := s.userRepo.GetOne(repositories.GetOneParams{Username: &username})
 	if err != nil {
 		return nil, err
 	}
@@ -60,5 +60,5 @@ func (s *userService) GetUserByUsername(ctx context.Context, username string) (*
 }
 
 func (s *userService) GetAllUsers(ctx context.Context) ([]models.User, error) {
-	return s.userRepo.GetAll(nil)
+	return s.userRepo.GetAll()
 }

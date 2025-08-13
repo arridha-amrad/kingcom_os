@@ -98,22 +98,22 @@ export default function OrderProvider({ children }: { children: ReactNode }) {
   return (
     <Context.Provider
       value={{
-        address,
-        discount,
         setAddress,
         setDiscount,
         setSubTotal,
         setTotal,
+        setCourier,
+        setDistrict,
+        setPromoCode,
+        findAvailableCouriers,
+        address,
+        discount,
         subTotal,
         total,
         courier,
-        setCourier,
-        findAvailableCouriers,
         availableCouriers,
-        setDistrict,
         district,
         promoCode,
-        setPromoCode,
       }}
     >
       {children}

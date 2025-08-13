@@ -16,6 +16,7 @@ type Config struct {
 	GoogleOAuth2     GoogleOAuth2Config
 	AppUri           string
 	RajaOngkirApiKey string
+	Midtrans         MidtransConfig
 }
 
 type RedisConfig struct {
@@ -23,6 +24,12 @@ type RedisConfig struct {
 	Password  string
 	DB        int
 	REDIS_URL string
+}
+
+type MidtransConfig struct {
+	MerchantID string
+	ClientKey  string
+	ServerKey  string
 }
 
 type GoogleOAuth2Config struct {
@@ -72,6 +79,11 @@ func LoadEnv() (*Config, error) {
 			MaxIdleTime:  vMaxIdleTime,
 			MaxOpenConns: vMaxOpenConns,
 			MaxIdleConns: vMaxIdleConns,
+		},
+		Midtrans: MidtransConfig{
+			MerchantID: os.Getenv("MIDTRANS_MERCHANT_ID"),
+			ClientKey:  os.Getenv("MIDTRANS_CLIENT_KEY"),
+			ServerKey:  os.Getenv("MIDTRANS_SERVER_KEY"),
 		},
 		RDB: RedisConfig{
 			ADDR:      os.Getenv("REDIS_ADDR"),

@@ -87,3 +87,7 @@ type CreateOrderRequestItem struct {
 	ProductID uuid.UUID `json:"productId"`
 	Quantity  int       `json:"quantity"`
 }
+
+type CheckoutRequest struct {
+	OrderId uuid.UUID `json:"orderId"`
+}

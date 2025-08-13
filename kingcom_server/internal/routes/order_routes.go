@@ -15,5 +15,6 @@ func SetOrderRoutes(params OrderRoutesParams) {
 	{
 		r.GET("", mdwAuth.Handler, controller.GetMany)
 		r.POST("", mdwAuth.Handler, mdwValidation.CreateOrder, controller.Create)
+		r.POST("/checkout", mdwAuth.Handler, mdwValidation.Checkout, controller.Checkout)
 	}
 }

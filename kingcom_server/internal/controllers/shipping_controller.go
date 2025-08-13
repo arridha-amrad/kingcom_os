@@ -37,7 +37,11 @@ type shippingController struct {
 	utils            utils.IUtils
 }
 
-func NewShippingController(redisService services.IRedisService, rajaOngkirApiKey string, utils utils.IUtils) IShippingController {
+func NewShippingController(
+	redisService services.IRedisService,
+	rajaOngkirApiKey string,
+	utils utils.IUtils,
+) IShippingController {
 	return &shippingController{
 		redisService:     redisService,
 		rajaOngkirApiKey: rajaOngkirApiKey,

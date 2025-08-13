@@ -3,11 +3,18 @@ package services
 import (
 	"context"
 	"fmt"
+	"kingcom_server/internal/config"
 	"kingcom_server/internal/dto"
+	"kingcom_server/internal/mapper"
+	"kingcom_server/internal/models"
 	"kingcom_server/internal/repositories"
 	"kingcom_server/internal/transaction"
+	"log"
+	"time"
 
 	"github.com/google/uuid"
+	"github.com/midtrans/midtrans-go"
+	"github.com/midtrans/midtrans-go/snap"
 	"gorm.io/gorm"
 )
 
@@ -16,6 +23,7 @@ type orderService struct {
 	cartRepository    repositories.ICartRepository
 	productRepository repositories.IProductRepository
 	txManager         transaction.ITransactionManager
+	midtransConfig    config.MidtransConfig
 }
 
 type IOrderService interface {
@@ -28,7 +36,17 @@ type IOrderService interface {
 	) error
 	GetOrders(
 		userId uuid.UUID,
-	) ([]repositories.MapperOrder, error)
+	) ([]mapper.MapperOrder, error)
+	GetMidtransTransactionToken(
+		orderId string,
+		orderTotal int64,
+		name string,
+		email string,
+		shippingAddress string,
+	) (*snap.Response, error)
+	GetOrderById(
+		orderId uuid.UUID,
+	) (*models.Order, error)
 }
 
 func NewOrderService(
@@ -36,13 +54,66 @@ func NewOrderService(
 	cartRepository repositories.ICartRepository,
 	productRepository repositories.IProductRepository,
 	txManager transaction.ITransactionManager,
+	midtransConfig config.MidtransConfig,
 ) IOrderService {
 	return &orderService{
 		orderRepository:   orderRepository,
 		cartRepository:    cartRepository,
 		productRepository: productRepository,
 		txManager:         txManager,
+		midtransConfig:    midtransConfig,
 	}
+}
+
+func (s *orderService) GetOrderById(
+	orderId uuid.UUID,
+) (*models.Order, error) {
+	return s.orderRepository.GetOrderById(orderId)
+}
+
+func (s *orderService) GetMidtransTransactionToken(
+	orderId uuid.UUID,
+	orderTotal int64,
+	name string,
+	email string,
+	shippingAddress string,
+) (*snap.Response, error) {
+	order, err := s.orderRepository.GetOrderById(orderId)
+	if err != nil {
+		return nil, err
+	}
+	items := make([]midtrans.ItemDetails, 0, len(order.OrderItems))
+	for _, i := range order.OrderItems {
+		items = append(items, midtrans.ItemDetails{
+			Name:  i.Product.Name,
+			Price: int64(i.Product.Price - i.Product.Price*float64(i.Product.Discount)/100),
+			Qty:   int32(i.Quantity),
+		})
+	}
+	var sn snap.Client
+	sn.New(s.midtransConfig.ServerKey, midtrans.Sandbox)
+	req := &snap.Request{
+		Items: &items,
+		TransactionDetails: midtrans.TransactionDetails{
+			OrderID:  fmt.Sprintf("%s-%d", orderId, time.Now().Unix()),
+			GrossAmt: orderTotal,
+		},
+		CreditCard: &snap.CreditCardDetails{
+			Secure: true,
+		},
+		CustomerDetail: &midtrans.CustomerDetails{
+			FName: name,
+			Email: email,
+			ShipAddr: &midtrans.CustomerAddress{
+				Address: shippingAddress,
+			},
+		},
+	}
+	snapResp, err := sn.CreateTransaction(req)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	return snapResp, nil
 }
 
 // TODO
@@ -118,7 +189,7 @@ func (s *orderService) PlaceOrder(
 
 func (s *orderService) GetOrders(
 	userId uuid.UUID,
-) ([]repositories.MapperOrder, error) {
+) ([]mapper.MapperOrder, error) {
 	orders, err := s.orderRepository.GetOrders(userId)
 	if err != nil {
 		return nil, err

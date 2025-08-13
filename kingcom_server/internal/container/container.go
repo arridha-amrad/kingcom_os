@@ -24,7 +24,12 @@ type Container struct {
 	utils.IUtils
 }
 
-func NewContainer(db *gorm.DB, rdb *redis.Client, validate *validator.Validate, config *config.Config) *Container {
+func NewContainer(
+	db *gorm.DB,
+	rdb *redis.Client,
+	validate *validator.Validate,
+	config *config.Config,
+) *Container {
 	// Repositories
 	userRepo := repositories.NewUserRepository(db)
 	redisRepo := repositories.NewRedisRepository(rdb)
@@ -35,18 +40,42 @@ func NewContainer(db *gorm.DB, rdb *redis.Client, validate *validator.Validate, 
 	orderRepo := repositories.NewOrderRepository(db)
 
 	// Utilities
-	utilities := utils.NewUtilities(config.JWtSecretKey, config.AppUri, config.GoogleOAuth2)
+	utilities := utils.NewUtilities(
+		config.JWtSecretKey,
+		config.AppUri,
+		config.GoogleOAuth2,
+	)
 
 	// Services
 	redisService := services.NewRedisService(redisRepo)
-	jwtService := services.NewJwtService(config.JWtSecretKey, redisService)
-	authService := services.NewAuthService(redisService, utilities, jwtService, txManager, userRepo)
+	jwtService := services.NewJwtService(
+		config.JWtSecretKey,
+		redisService,
+	)
+	authService := services.NewAuthService(
+		redisService,
+		utilities,
+		jwtService,
+		txManager,
+		userRepo,
+	)
 	userService := services.NewUserService(userRepo)
 	emailService := services.NewEmailService(config.AppUri, utilities)
 	passwordService := services.NewPasswordService()
-	productService := services.NewProductService(productImagesRepo, productRepo, txManager, utilities)
+	productService := services.NewProductService(
+		productImagesRepo,
+		productRepo,
+		txManager,
+		utilities,
+	)
 	cartService := services.NewCartService(cartRepo, txManager)
-	orderService := services.NewOrderService(orderRepo, cartRepo, productRepo, txManager)
+	orderService := services.NewOrderService(
+		orderRepo,
+		cartRepo,
+		productRepo,
+		txManager,
+		config.Midtrans,
+	)
 
 	// Controllers
 	userCtrl := user.NewUserController(userService)
@@ -58,13 +87,21 @@ func NewContainer(db *gorm.DB, rdb *redis.Client, validate *validator.Validate, 
 		redisService,
 		utilities,
 	)
-	productCtrl := product.NewProductController(productService, userService, cartService)
+	productCtrl := product.NewProductController(
+		productService,
+		userService,
+		cartService,
+	)
 	shippingCtrl := controllers.NewShippingController(
 		redisService,
 		config.RajaOngkirApiKey,
 		utilities,
 	)
-	orderCtrl := controllers.NewOrderController(orderService)
+	orderCtrl := controllers.NewOrderController(
+		orderService,
+		authService,
+		userService,
+	)
 
 	// Middleware
 	validationMiddleware := middleware.NewValidationMiddleware(validate)
