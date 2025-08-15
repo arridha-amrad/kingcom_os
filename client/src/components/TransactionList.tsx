@@ -14,5 +14,11 @@ export default function TransactionList() {
     }
   }, [isError]);
 
-  return transactions?.map((t) => <TransactionItem key={t.id} item={t} />);
+  return (
+    <div className="space-y-4 my-4">
+      {transactions?.map((t) => (
+        <TransactionItem key={t.id} item={t} />
+      ))}
+    </div>
+  );
 }

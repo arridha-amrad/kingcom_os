@@ -32,7 +32,6 @@ export default function TransactionItem({ item }: Props) {
         onSuccess: (data: any) => {
           console.log('payment success ', data);
           toast.success('checkout successful', { id });
-          navigate({ to: '/transactions' });
         },
         onPending: function (data: any) {
           console.log('pending');
@@ -55,7 +54,7 @@ export default function TransactionItem({ item }: Props) {
   return (
     <div
       key={item.id}
-      className="border border-foreground/20 rounded-2xl py-4 px-8 mt-4"
+      className="border border-foreground/20 rounded-2xl px-8 py-4 space-y-4"
     >
       <div className="flex items-center gap-4">
         <ShoppingBasket className="size-6 stroke-foreground fill-foreground" />
@@ -77,13 +76,35 @@ export default function TransactionItem({ item }: Props) {
                   src={i.product.images[0].url}
                 />
               </div>
-              <div className="pt-4">
+              <div className="">
                 <div className="line-clamp-1 font-semibold">
                   {i.product.name}
                 </div>
-                <div className="font-light text-foreground/70">
-                  {i.quantity} x {formatToIdr(i.product.price)}
-                </div>
+                {i.product.discount > 0 && (
+                  <div className="flex items-center gap-2">
+                    <div className="text-red-600">
+                      <div className="bg-red-500/10 w-fit text-red-500 rounded-full font-medium text-xs flex items-center justify-center py-1 px-2">
+                        -{i.product.discount}%
+                      </div>
+                    </div>
+                    <div className="text-foreground/70 line-through">
+                      {formatToIdr(i.product.price)}
+                    </div>
+                  </div>
+                )}
+                {i.product.discount > 0 ? (
+                  <div className="font-light text-foreground/70">
+                    {i.quantity} x{' '}
+                    {formatToIdr(
+                      i.product.price -
+                        (i.product.price * i.product.discount) / 100,
+                    )}
+                  </div>
+                ) : (
+                  <div className="font-light text-foreground/70">
+                    {i.quantity} x {formatToIdr(i.product.price)}
+                  </div>
+                )}
               </div>
             </div>
           ))}

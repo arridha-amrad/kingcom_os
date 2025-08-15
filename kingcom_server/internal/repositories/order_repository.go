@@ -47,6 +47,7 @@ func (r *orderRepository) GetOrderById(
 ) (*models.Order, error) {
 	var order models.Order
 	if err := r.db.Where("id = ?", orderId).
+		Preload("User").
 		Preload("OrderItems").
 		Preload("OrderItems.Product").
 		Preload("Shipping").
@@ -64,7 +65,7 @@ func (r *orderRepository) GetOrders(
 		Where("user_id = ?", userId).
 		Preload("OrderItems").
 		Preload("OrderItems.Product", func(db *gorm.DB) *gorm.DB {
-			return db.Select("id", "name", "weight", "slug", "price", "stock")
+			return db.Select("id", "name", "weight", "slug", "price", "stock", "discount")
 		}).
 		Preload("OrderItems.Product.Images", func(db *gorm.DB) *gorm.DB {
 			return db.Select("id", "product_id", "url")

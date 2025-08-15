@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"kingcom_server/internal/constants"
 	"kingcom_server/internal/dto"
 	"kingcom_server/internal/services"
@@ -56,31 +57,15 @@ func (ctrl *orderController) Checkout(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to query order by id"})
 		return
 	}
-	payload, err := ctrl.authService.GetAccessTokenPayload(c)
+	snapRes, err := ctrl.orderService.GetMidtransTransactionToken(order.ID)
 	if err != nil {
-		log.Println(err.Error())
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "failed to get access token payload"})
-		return
-	}
-	user, err := ctrl.userService.GetUserById(c.Request.Context(), payload.UserId)
-	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
-		return
-	}
-	snapRes, err := ctrl.orderService.GetMidtransTransactionToken(
-		order.ID.String(),
-		order.Total,
-		user.Name,
-		user.Email,
-		order.Shipping.Address,
-	)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		errMsg := fmt.Sprintf("%v", err) // tidak langsung akses .Error()
+		log.Println("Midtrans error:", errMsg)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": errMsg})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"token": snapRes.Token,
-		"url":   snapRes.RedirectURL,
+		"token": snapRes,
 	})
 }
 

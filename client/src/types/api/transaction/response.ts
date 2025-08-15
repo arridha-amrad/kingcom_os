@@ -1,6 +1,5 @@
 export interface CheckoutMutationResponse {
   token: string;
-  url: string;
 }
 
 export interface GetTransactionsResponse {
@@ -47,6 +46,7 @@ export interface Product {
   price: number;
   stock: number;
   images: ProductImage[];
+  discount: number;
 }
 
 export interface ProductImage {

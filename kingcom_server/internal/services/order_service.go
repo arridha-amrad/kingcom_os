@@ -9,7 +9,6 @@ import (
 	"kingcom_server/internal/models"
 	"kingcom_server/internal/repositories"
 	"kingcom_server/internal/transaction"
-	"log"
 	"time"
 
 	"github.com/google/uuid"
@@ -38,12 +37,8 @@ type IOrderService interface {
 		userId uuid.UUID,
 	) ([]mapper.MapperOrder, error)
 	GetMidtransTransactionToken(
-		orderId string,
-		orderTotal int64,
-		name string,
-		email string,
-		shippingAddress string,
-	) (*snap.Response, error)
+		orderId uuid.UUID,
+	) (string, error)
 	GetOrderById(
 		orderId uuid.UUID,
 	) (*models.Order, error)
@@ -71,16 +66,59 @@ func (s *orderService) GetOrderById(
 	return s.orderRepository.GetOrderById(orderId)
 }
 
+// func (s *orderService) GetMidtransTransactionToken(orderId uuid.UUID) (string, error) {
+// 	order, err := s.orderRepository.GetOrderById(orderId)
+// 	if err != nil {
+// 		return "", err
+// 	}
+// 	var sn snap.Client
+// 	sn.New(s.midtransConfig.ServerKey, midtrans.Sandbox)
+// 	items := make([]midtrans.ItemDetails, 0, len(order.OrderItems))
+// 	for _, i := range order.OrderItems {
+// 		items = append(items, midtrans.ItemDetails{
+// 			ID:    i.Product.ID.String(),
+// 			Name:  i.Product.Name,
+// 			Price: int64(i.Product.Price),
+// 			Qty:   int32(i.Quantity),
+// 		})
+// 	}
+
+// 	snapReq := &snap.Request{
+// 		TransactionDetails: midtrans.TransactionDetails{
+// 			OrderID:  order.ID.String(),
+// 			GrossAmt: int64(order.Total),
+// 		},
+// 		Items: &items,
+// 		CustomerDetail: &midtrans.CustomerDetails{
+// 			FName: order.User.Name,
+// 			Email: order.User.Email,
+// 		},
+// 				Callbacks: &snap.Callbacks{
+// 					Finish: "http://localhost:3000/transactions",
+// 				},
+// 	}
+// 	snapResp, midErr := sn.CreateTransaction(snapReq)
+// 	if midErr != nil {
+// 		// Pastikan midErr nil saat sukses
+// 		if midErr.Error() != "" {
+// 			return "", midErr
+// 		}
+// 		return "", fmt.Errorf("failed to create transaction token")
+// 	}
+
+// 	if snapResp == nil || snapResp.Token == "" {
+// 		return "", fmt.Errorf("empty transaction token from Midtrans")
+// 	}
+
+// 	return snapResp.Token, nil
+// }
+
 func (s *orderService) GetMidtransTransactionToken(
 	orderId uuid.UUID,
-	orderTotal int64,
-	name string,
-	email string,
-	shippingAddress string,
-) (*snap.Response, error) {
+) (string, error) {
 	order, err := s.orderRepository.GetOrderById(orderId)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	items := make([]midtrans.ItemDetails, 0, len(order.OrderItems))
 	for _, i := range order.OrderItems {
@@ -90,30 +128,46 @@ func (s *orderService) GetMidtransTransactionToken(
 			Qty:   int32(i.Quantity),
 		})
 	}
+	items = append(items, midtrans.ItemDetails{
+		Name:  fmt.Sprintf("Shipping-%s", order.Shipping.Name),
+		Price: int64(order.Shipping.Cost),
+		Qty:   1,
+	})
 	var sn snap.Client
 	sn.New(s.midtransConfig.ServerKey, midtrans.Sandbox)
 	req := &snap.Request{
 		Items: &items,
 		TransactionDetails: midtrans.TransactionDetails{
-			OrderID:  fmt.Sprintf("%s-%d", orderId, time.Now().Unix()),
-			GrossAmt: orderTotal,
+			OrderID:  fmt.Sprintf("%s-%d", order.ID, time.Now().Unix()),
+			GrossAmt: order.Total,
 		},
 		CreditCard: &snap.CreditCardDetails{
 			Secure: true,
 		},
 		CustomerDetail: &midtrans.CustomerDetails{
-			FName: name,
-			Email: email,
+			FName: order.User.Name,
+			Email: order.User.Email,
 			ShipAddr: &midtrans.CustomerAddress{
-				Address: shippingAddress,
+				Address: order.Shipping.Address,
 			},
 		},
+		Callbacks: &snap.Callbacks{
+			Finish: "http://localhost:3000/transactions",
+		},
 	}
-	snapResp, err := sn.CreateTransaction(req)
-	if err != nil {
-		log.Println(err.Error())
-	}
-	return snapResp, nil
+	token, _ := sn.CreateTransactionToken(req)
+	// if err != nil {
+	// 	// Pastikan midErr nil saat sukses
+	// 	if err.Error() != "" {
+	// 		return "", err
+	// 	}
+	// 	return "", fmt.Errorf("failed to create transaction token")
+	// }
+
+	// if token == "" {
+	// 	return "", fmt.Errorf("empty transaction token from Midtrans")
+	// }
+	return token, nil
 }
 
 // TODO
